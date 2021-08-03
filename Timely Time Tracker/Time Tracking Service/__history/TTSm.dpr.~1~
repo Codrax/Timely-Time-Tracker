@@ -1,0 +1,14 @@
+program TTSm;
+
+uses
+  Vcl.Forms,
+  TTSp in '..\Time Tracking Service\TTSp.pas' {TTS};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TTTS, TTS);
+  Application.Run;
+end.

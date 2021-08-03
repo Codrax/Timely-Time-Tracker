@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2021/08/03 10:12:06.000.717,=D:\Coding Related\My Delphi\Unit1.pas</Transaction>
+    <Transaction>2021/08/03 10:38:43.000.173,D:\Coding Related\My Delphi\TTSp.pas=D:\Coding Related\My Delphi\Unit1.pas</Transaction>
+    <Transaction>2021/08/03 10:38:43.000.173,D:\Coding Related\My Delphi\TTSp.dfm=D:\Coding Related\My Delphi\Unit1.dfm</Transaction>
+    <Transaction>2021/08/03 10:39:01.000.717,D:\Coding Related\My Delphi\Time Tracking Service\TTSm.dproj=D:\Coding Related\My Delphi\Project1.dproj</Transaction>
+    <Transaction>2021/08/03 12:26:31.000.663,=D:\Coding Related\My Delphi\Time Tracking Service\Unit1.pas</Transaction>
+    <Transaction>2021/08/03 12:28:59.000.658,D:\Coding Related\My Delphi\Time Tracking Service\Unit1.dfm=D:\Coding Related\My Delphi\Time Tracking Service\InfScr.dfm</Transaction>
+    <Transaction>2021/08/03 12:28:59.000.658,D:\Coding Related\My Delphi\Time Tracking Service\Unit1.pas=D:\Coding Related\My Delphi\Time Tracking Service\InfScr.pas</Transaction>
+    <Transaction>2021/08/03 15:51:26.000.759,=D:\Coding Related\My Delphi\Time Tracking Service\Unit2.pas</Transaction>
+    <Transaction>2021/08/03 15:51:37.000.103,D:\Coding Related\My Delphi\Time Tracking Service\notify.pas=D:\Coding Related\My Delphi\Time Tracking Service\Unit2.pas</Transaction>
+    <Transaction>2021/08/03 15:51:37.000.103,D:\Coding Related\My Delphi\Time Tracking Service\notify.dfm=D:\Coding Related\My Delphi\Time Tracking Service\Unit2.dfm</Transaction>
+    <Transaction>2021/08/03 16:00:18.000.922,=D:\Coding Related\My Delphi\Time Tracking Service\Unit3.pas</Transaction>
+    <Transaction>2021/08/03 16:01:14.000.846,=D:\Coding Related\My Delphi\Time Tracking Service\Unit2.pas</Transaction>
+    <Transaction>2021/08/03 16:01:36.000.579,D:\Coding Related\My Delphi\Time Tracking Service\Unit2.pas=D:\Coding Related\My Delphi\Time Tracking Service\infoshow.pas</Transaction>
+    <Transaction>2021/08/03 16:01:36.000.579,D:\Coding Related\My Delphi\Time Tracking Service\Unit2.dfm=D:\Coding Related\My Delphi\Time Tracking Service\infoshow.dfm</Transaction>
+  </Transactions>
+</BorlandProject>

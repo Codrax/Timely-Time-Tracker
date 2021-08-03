@@ -1,0 +1,16 @@
+program TTSm;
+
+uses
+  Vcl.Forms,
+  TTSp in 'TTSp.pas' {TTS},
+  InfScr in 'InfScr.pas' {Form1};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TTTS, TTS);
+  Application.CreateForm(TForm1, Form1);
+  Application.Run;
+end.
