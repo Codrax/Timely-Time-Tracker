@@ -1,5 +1,5 @@
 # Timely-Time-Tracker
-Timely Time Trackers is a piece of software that tracks your daily computer usage. For it to work it must be stored in the Program Files Directory and you must add a shortcut to the main background process is "shell:startup"
+Timely Time Trackers is a piece of software that tracks your daily computer usage. To install it download one of the listed released.
 
 This software is fully open-source so everyone can contribute and optimize the software.
 
