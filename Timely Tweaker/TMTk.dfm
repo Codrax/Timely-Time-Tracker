@@ -1,11 +1,16 @@
 object Form1: TForm1
   Left = 0
   Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Timely Time Tracker Tweaker'
   ClientHeight = 383
   ClientWidth = 539
   Color = clGray
+  Constraints.MaxHeight = 412
+  Constraints.MaxWidth = 545
+  Constraints.MinHeight = 412
+  Constraints.MinWidth = 545
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -67,6 +72,67 @@ object Form1: TForm1
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
+    Transparent = False
+  end
+  object Image1: TImage
+    Left = 512
+    Top = 0
+    Width = 25
+    Height = 25
+    OnClick = Image1Click
+  end
+  object CheckBox5: TCheckBox
+    Left = 32
+    Top = 249
+    Width = 225
+    Height = 17
+    Caption = 'Allow +1h Button in Alarm popup'
+    TabOrder = 11
+  end
+  object CheckBox4: TCheckBox
+    Left = 32
+    Top = 218
+    Width = 322
+    Height = 17
+    Caption = 'Make Timely Time Tracker start with Windows'
+    TabOrder = 9
+  end
+  object GroupBox1: TGroupBox
+    Left = 32
+    Top = 272
+    Width = 167
+    Height = 49
+    Caption = ' Font Options '
+    Color = 9671571
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindow
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentBackground = False
+    ParentColor = False
+    ParentFont = False
+    TabOrder = 10
+    object InsFont: TButton
+      Left = 3
+      Top = 16
+      Width = 75
+      Height = 25
+      Caption = 'Install'
+      ElevationRequired = True
+      TabOrder = 0
+      OnClick = InsFontClick
+    end
+    object UnFont: TButton
+      Left = 84
+      Top = 16
+      Width = 75
+      Height = 25
+      Caption = 'Uninstall'
+      ElevationRequired = True
+      TabOrder = 1
+      OnClick = UnFontClick
+    end
   end
   object Edit1: TEdit
     Left = 32

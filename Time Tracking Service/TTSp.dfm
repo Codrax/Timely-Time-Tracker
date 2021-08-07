@@ -3551,4 +3551,10 @@ object TTS: TTTS
       OnClick = ExitClick
     end
   end
+  object StartCheck500ms: TTimer
+    Interval = 1100
+    OnTimer = StartCheck500msTimer
+    Left = 24
+    Top = 88
+  end
 end

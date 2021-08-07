@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<BorlandProject>
-	<Transactions>
-    <Transaction>2021/08/03 11:18:41.000.840,=D:\Coding Related\My Delphi\Unit1.pas</Transaction>
-    <Transaction>2021/08/03 11:58:54.000.790,D:\Coding Related\My Delphi\Unit1.pas=D:\Coding Related\My Delphi\Time Tracker UI\TTUmu.pas</Transaction>
-    <Transaction>2021/08/03 11:58:54.000.790,D:\Coding Related\My Delphi\Unit1.dfm=D:\Coding Related\My Delphi\Time Tracker UI\TTUmu.dfm</Transaction>
-    <Transaction>2021/08/03 11:59:03.000.996,D:\Coding Related\My Delphi\Project1.dproj=D:\Coding Related\My Delphi\Time Tracker UI\TTU.dproj</Transaction>
-  </Transactions>
-</BorlandProject>

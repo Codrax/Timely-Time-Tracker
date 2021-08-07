@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Themes,
   Vcl.Imaging.pngimage;
 
 type
@@ -28,6 +28,7 @@ type
 var
   Form2: TForm2;
   times: Integer;
+  nrtot: Integer;
 
 implementation
 
@@ -48,7 +49,8 @@ procedure TForm2.ShowANTimer(Sender: TObject);
 begin
 Form2.Show;
 Form2.Left:=Form2.Left-25;
-if Form2.Left=Screen.Width-(Form2.Width+100) then begin ShowAN.Enabled:=false; Timer1.Enabled:=true; end;
+nrtot:=nrtot+1;
+if nrtot>24 then begin ShowAN.Enabled:=false; Timer1.Enabled:=true; end;
 end;
 
 procedure TForm2.Timer1Timer(Sender: TObject);

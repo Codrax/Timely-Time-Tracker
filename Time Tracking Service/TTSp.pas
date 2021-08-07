@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, MMSystem, Vcl.ExtCtrls, Vcl.Menus,
-  Vcl.ComCtrls, Vcl.Grids, Vcl.Samples.Calendar, InfScr, infoshow;
+  Vcl.ComCtrls, Vcl.Grids, Vcl.Samples.Calendar, InfScr, infoshow, Vcl.Themes;
 
 type
   TTTS = class(TForm)
@@ -17,11 +17,13 @@ type
     N1: TMenuItem;
     Calendar1: TCalendar;
     ManageSettings1: TMenuItem;
+    StartCheck500ms: TTimer;
     procedure TRTimer(Sender: TObject);
     procedure ExitClick(Sender: TObject);
     procedure UIOClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure ManageSettings1Click(Sender: TObject);
+    procedure StartCheck500msTimer(Sender: TObject);
   protected
     procedure CreateParams(var Params: TCreateParams); override;
   end;
@@ -44,6 +46,7 @@ implementation
 procedure TTTS.CreateParams(var Params: TCreateParams);
 var
 A: textfile;
+B: textfile;
 begin
   inherited;
   Params.ExStyle := Params.ExStyle and not WS_EX_APPWINDOW;
@@ -60,8 +63,17 @@ begin
     reset(F);
     read(F,temp);
       //Load File
-  if strtoint(temp)>0 then try sec:=strtoint(temp);
-    finally end; end
+      try
+      if strtoint(temp)>0 then sec:=strtoint(temp);
+      except
+      assignfile(B,'C:\ProgramData\TTS\errorlog' + inttostr(calendar1.Day) + '.' + inttostr(calendar1.month) + '.' + inttostr(calendar1.year) + '.txt');
+      rewrite(B);
+      writeln(B,'Exception occured on: ' + datetostr(date) + ' at ' + timetostr(time));
+      closefile(B);
+      sec:=0;
+      end;
+
+    end
     finally
     closefile(F);
   end;
@@ -69,6 +81,11 @@ begin
 
 
      //create other files
+  if NOT (fileexists('C:\ProgramData\TTS\allowaddbutton.no')) and NOT (fileexists('C:\ProgramData\TTS\allowaddbutton.in')) then begin
+    assignfile(A,'C:\ProgramData\TTS\allowaddbutton.no');
+    rewrite(A);
+    closefile(A);
+  end;
   if NOT fileexists('C:\ProgramData\TTS\howlongwait.dat') then begin
     assignfile(A,'C:\ProgramData\TTS\howlongwait.dat');
     rewrite(A);
@@ -90,8 +107,24 @@ begin
     rewrite(A);
     closefile(A);
   end;
-
-
+  if NOT fileexists('C:\ProgramData\TTS\howlongwait.dat') then begin
+    assignfile(A,'C:\ProgramData\TTS\howlongwait.dat');
+    rewrite(A);
+    write(A,'-1');
+    closefile(A);
+  end;
+  if NOT fileexists('C:\ProgramData\TTS\normalmode.in') then begin
+    assignfile(A,'C:\ProgramData\TTS\normalmode.in');
+    rewrite(A);
+    write(A,'-1');
+    closefile(A);
+  end;
+  if NOT fileexists('C:\ProgramData\TTS\dtwkedit.no') then begin
+    assignfile(A,'C:\ProgramData\TTS\dtwkedit.no');
+    rewrite(A);
+    write(A,'-1');
+    closefile(A);
+  end;
 end;
 
 
@@ -104,16 +137,28 @@ end;
 procedure TTTS.FormCreate(Sender: TObject);
 
 begin
-
+//Theme Loader
+if fileexists('C:\ProgramData\TTS\modedark.dat') then begin
+  TStyleManager.SetStyle('Windows10 Dark');
+end else begin
+  TStyleManager.SetStyle('Windows10');
+end;
 
 if fileexists('C:\ProgramData\TTS\disablequit.in') then Exit.Enabled:=false;
-
-
 
 TTS.Hide;
 TTS.Width:=1;
 TTS.Height:=1;
-if sec=timetostop then begin
+end;
+
+procedure TTTS.ManageSettings1Click(Sender: TObject);
+begin
+WinExec('C:\Program Files\Timely Time Tracker\Tweaker.exe', SW_SHOW);
+end;
+
+procedure TTTS.StartCheck500msTimer(Sender: TObject);
+begin
+if (sec>timetostop) and not (timetostop = -1) then begin
       sndPlaySound('C:\Windows\Media\Alarm10.wav', SND_ASYNC);
       Form1.SoundAlarm.Enabled:=true;
       Form1.Show;
@@ -125,11 +170,8 @@ if sec=timetostop then begin
        Form1.Label5.Left:=120;
        Form1.tmr.Show;
     end; end;
-end;
 
-procedure TTTS.ManageSettings1Click(Sender: TObject);
-begin
-WinExec('C:\Program Files\Timely Time Tracker\Tweaker.exe', SW_SHOW);
+  StartCheck500ms.Enabled:=false;
 end;
 
 procedure TTTS.TRTimer(Sender: TObject);
@@ -143,7 +185,8 @@ if fileexists('C:\ProgramData\TTS\howlongwait.dat') then begin
     assignfile(T,'C:\ProgramData\TTS\howlongwait.dat');
     reset(T);
     read(T,tempstop);
-    timetostop:=strtoint(tempstop);
+    timetostop:=strtoint(tempstop) + BonusTime;
+    if fileexists('C:\ProgramData\TTS\allowaddbutton.in') then Form1.Add.Show else Form1.Add.Hide;
     closefile(T);
   end;
 //  In case of next day
@@ -164,7 +207,8 @@ assignfile(F,'C:\ProgramData\TTS\dts\' + filename + '.dat');
 
   //IF TIMES UP
   if sec=timetostop then begin
-      sndPlaySound('C:\Windows\Media\Alarm10.wav', SND_ASYNC);
+      if fileexists('C:\Windows\Media\Alarm10.wav') then
+ sndPlaySound('C:\Windows\Media\Alarm10.wav', SND_ASYNC);
       Form1.SoundAlarm.Enabled:=true;
       Form1.Show;
       if fileexists('C:\ProgramData\TTS\forcequit60s.in') then begin
@@ -180,31 +224,43 @@ assignfile(F,'C:\ProgramData\TTS\dts\' + filename + '.dat');
   if fileexists('C:\ProgramData\TTS\remindersenabled.in') then begin
   //Form 2 Notification Animation (15min)
   if sec=timetostop-900 then begin
+    nrtot:=0;
     Form2.ShowAN.Enabled:=true;
-    Form2.Top:=50;
+    Form2.Top:=35;
     Form2.Left:=screen.Width + 200;
     Form2.Label2.Caption:='15 Minutes Left!';
+    if fileexists('C:\Windows\Media\Windows Notify Messaging.wav') then
+    sndPlaySound('C:\Windows\Media\Windows Notify Messaging.wav', SND_ASYNC);
   end;
   //Form 2 Notification Animation (10min)
   if sec=timetostop-600 then begin
+    nrtot:=0;
     Form2.ShowAN.Enabled:=true;
-    Form2.Top:=50;
+    Form2.Top:=35;
     Form2.Left:=screen.Width + 200;
     Form2.Label2.Caption:='10 Minutes Left!';
+    if fileexists('C:\Windows\Media\Windows Notify Messaging.wav') then
+    sndPlaySound('C:\Windows\Media\Windows Notify Messaging.wav', SND_ASYNC);
   end;
   //Form 2 Notification Animation (5min)
   if sec=timetostop-300 then begin
+    nrtot:=0;
     Form2.ShowAN.Enabled:=true;
-    Form2.Top:=50;
+    Form2.Top:=35;
     Form2.Left:=screen.Width + 200;
     Form2.Label2.Caption:='5 Minutes Left!';
+    if fileexists('C:\Windows\Media\Windows Notify Messaging.wav') then
+    sndPlaySound('C:\Windows\Media\Windows Notify Messaging.wav', SND_ASYNC);
   end;
   //Form 2 Notification Animation (1min)
-  if sec=timetostop-300 then begin
+  if sec=timetostop-60 then begin
+    nrtot:=0;
     Form2.ShowAN.Enabled:=true;
-    Form2.Top:=50;
+    Form2.Top:=35;
     Form2.Left:=screen.Width + 200;
-    Form2.Label2.Caption:='1 Minutes Left!';
+    Form2.Label2.Caption:='1 Minute Left!';
+    if fileexists('C:\Windows\Media\Windows Notify Messaging.wav') then
+    sndPlaySound('C:\Windows\Media\Windows Notify Messaging.wav', SND_ASYNC);
   end;
   end;
 end;

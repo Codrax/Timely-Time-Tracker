@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, ShellAPI, Vcl.ExtCtrls;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, ShellAPI, Vcl.ExtCtrls, Vcl.Themes;
 
 type
   TForm1 = class(TForm)
@@ -23,12 +23,23 @@ type
     Label5: TLabel;
     Button5: TButton;
     Panel1: TPanel;
+    CheckBox4: TCheckBox;
+    InsFont: TButton;
+    UnFont: TButton;
+    GroupBox1: TGroupBox;
+    Image1: TImage;
+    CheckBox5: TCheckBox;
     procedure Button2Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure checkdata;
     procedure Button5Click(Sender: TObject);
+    procedure InsFontClick(Sender: TObject);
+    procedure UnFontClick(Sender: TObject);
+    procedure Button6Click(Sender: TObject);
+    procedure killcmdTimer(Sender: TObject);
+    procedure Image1Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -38,6 +49,8 @@ type
 var
   Form1: TForm1;
   MaintananceNeeded: Boolean;
+  add: integer = -1;
+  node: integer = -1;
 
 implementation
 
@@ -46,6 +59,7 @@ implementation
 procedure TForm1.Button1Click(Sender: TObject);
 var
 R: textfile;
+ResStream: TResourceStream;
 begin
 //
 if CheckBox1.Checked=true then begin
@@ -69,13 +83,45 @@ end else begin
 end;
 //
 if CheckBox3.Checked=true then begin
-  if fileexists('C:\ProgramData\TTS\remindersenabled.no') then deletefile('C:\ProgramData\TTS\forequit60s.no');
+  if fileexists('C:\ProgramData\TTS\remindersenabled.no') then deletefile('C:\ProgramData\TTS\remindersenabled.no');
   assignfile(R,'C:\ProgramData\TTS\remindersenabled.in');
   rewrite(R); closefile(R);
 end else begin
   if fileexists('C:\ProgramData\TTS\remindersenabled.in') then deletefile('C:\ProgramData\TTS\remindersenabled.in');
   assignfile(R,'C:\ProgramData\TTS\remindersenabled.no');
   rewrite(R); closefile(R);
+end;
+//
+if CheckBox5.Checked=true then begin
+  if fileexists('C:\ProgramData\TTS\allowaddbutton.no') then deletefile('C:\ProgramData\TTS\allowaddbutton.no');
+  assignfile(R,'C:\ProgramData\TTS\allowaddbutton.in');
+  rewrite(R); closefile(R);
+end else begin
+  if fileexists('C:\ProgramData\TTS\allowaddbutton.in') then deletefile('C:\ProgramData\TTS\allowaddbutton.in');
+  assignfile(R,'C:\ProgramData\TTS\allowaddbutton.no');
+  rewrite(R); closefile(R);
+end;
+//
+if CheckBox4.Checked=false then begin
+if fileexists('C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\Timely Time Tracker.lnk') then begin
+ShellExecute(0, 'runas', 'cmd.exe', PChar(' /k del "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\Timely Time Tracker.lnk"'), nil, SW_SHOW);
+    ShowMessage('You may now close the Command Prompt');
+end;
+end
+else begin
+begin
+
+  ResStream := TResourceStream.Create(HInstance, 'Resource_1', RT_RCDATA);
+  try
+    ResStream.Position := 1;
+    ResStream.SaveToFile('C:\ProgramData\TTS\Timely Time Tracker.lnk');
+    ShellExecute(0, 'runas', 'cmd.exe', PChar(' /k "copy "C:\ProgramData\TTS\Timely Time Tracker.lnk" "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\Timely Time Tracker.lnk""'), nil, SW_SHOW);
+    ShowMessage('You may now close the Command Prompt');
+  finally
+    ResStream.Free;
+  end;
+end;
+
 end;
 //
 assignfile(R,'C:\ProgramData\TTS\howlongwait.dat');
@@ -96,6 +142,7 @@ begin
 WinExec('cmd /k "taskkill /f /im "TTSm.exe""', SW_SHOW);
 WinExec('cmd /k "taskkill /f /im "cmd.exe""', SW_SHOW);
 ShellExecute(Handle, 'open', 'C:\Program Files\Timely Time Tracker\TTSm.exe', nil, nil, SW_SHOWNORMAL);
+ShowMessage('You may now close the COmmand Prompt');
 
 if not directoryexists('C:\ProgramData\TTS\') then mkdir('C:\ProgramData\TTS\');
 if not directoryexists('C:\ProgramData\TTS\dts') then mkdir('C:\ProgramData\TTS\dts');
@@ -117,6 +164,9 @@ assignfile(R,'C:\ProgramData\TTS\howlongwait.dat');
   write(R,'-1');
   closefile(R);
 assignfile(R,'C:\ProgramData\TTS\disablequit.no');
+  rewrite(R);
+  closefile(R);
+  assignfile(R,'C:\ProgramData\TTS\allowaddbutton.no');
   rewrite(R);
   closefile(R);
   assignfile(R,'C:\ProgramData\TTS\forcequit60s.no');
@@ -145,6 +195,89 @@ begin
 Application.Terminate;
 end;
 
+procedure TForm1.Button6Click(Sender: TObject);
+begin
+ShellExecute(0, 'open', 'cmd.exe', PChar(' /k "winver"'), nil, SW_SHOW);
+end;
+
+procedure TForm1.Image1Click(Sender: TObject);
+var
+J: textfile;
+begin
+if add=5 then begin
+  assignfile(J,'C:\ProgramData\TTS\enabledebug.in');
+  rewrite(J);
+  closefile(J);
+  label2.Caption:='Timely Options.';
+end
+else add:=0;
+
+
+if node=15 then begin
+  label2.Caption:='Timely .Options';
+
+  if MessageDlg('Are you sure you want to disable "Timely Tweaker"? This action can only be reverted by modifying the disable data file of Timely Time Tracker.', mtConfirmation, [mbYes, mbNo], 0) = mrYes then begin
+  deletefile('C:\ProgramData\TTS\dtwkedit.no');
+  assignfile(J,'C:\ProgramData\TTS\dtwkedit.in');
+  rewrite(J);
+  closefile(J);
+  label2.Caption:='Timely .Options (Disables on next launch)';
+
+  end;
+end
+else node:=0;
+
+end;
+
+procedure TForm1.InsFontClick(Sender: TObject);
+var
+ResStream: TResourceStream;
+begin
+
+
+
+//EXTRACT FONTS
+if not directoryexists('C:\ProgramData\TTS\') then mkdir('C:\ProgramData\TTS\');
+if not directoryexists('C:\ProgramData\TTS\fonts\') then mkdir('C:\ProgramData\TTS\fonts\');
+  //
+  if not fileexists('C:\ProgramData\TTS\fonts\Nexa Bold.otf') then begin
+  ResStream := TResourceStream.Create(HInstance, 'Resource_2', RT_RCDATA);
+  try
+    ResStream.Position := 1;
+    ResStream.SaveToFile('C:\ProgramData\TTS\fonts\Nexa Bold.otf');
+  finally
+    ResStream.Free;
+  end; end;
+
+  //
+  if not fileexists('C:\ProgramData\TTS\fonts\Nexa Light.otf') then begin
+    ResStream := TResourceStream.Create(HInstance, 'Resource_3', RT_RCDATA);
+  try
+    ResStream.Position := 1;
+    ResStream.SaveToFile('C:\ProgramData\TTS\fonts\Nexa Light.otf');
+  finally
+    ResStream.Free;
+  end; end;
+
+
+  AddFontResource('C:\ProgramData\TTS\fonts\Nexa Bold.otf');
+  AddFontResource('C:\ProgramData\TTS\fonts\Nexa Light.otf');
+  SendMessage(HWND_BROADCAST,WM_FONTCHANGE,0,0);
+end;
+
+
+procedure TForm1.killcmdTimer(Sender: TObject);
+begin
+ShellExecute(0, 'runas', 'cmd.exe', PChar(' /k "taskkill /f /im cmd.exe"'), nil, SW_SHOW);
+end;
+
+procedure TForm1.UnFontClick(Sender: TObject);
+begin
+RemoveFontResource('C:\ProgramData\TTS\fonts\Nexa Light.otf');
+RemoveFontResource('C:\ProgramData\TTS\fonts\Nexa Bold.otf');
+SendMessage(HWND_BROADCAST,WM_FONTCHANGE,0,0);
+end;
+
 procedure TForm1.checkdata;
 var
 A: textfile;
@@ -157,14 +290,19 @@ read(A,temp);
 Edit1.Text:=temp;
 closefile(A);
 
+if fileexists('C:\ProgramData\TTS\allowaddbutton.no') then CheckBox1.Checked:=false else CheckBox1.Checked:=true;
 if fileexists('C:\ProgramData\TTS\disablequit.no') then CheckBox1.Checked:=true else CheckBox1.Checked:=false;
 if fileexists('C:\ProgramData\TTS\forcequit60s.no') then CheckBox2.Checked:=false else CheckBox2.Checked:=true;
 if fileexists('C:\ProgramData\TTS\remindersenabled.no') then CheckBox3.Checked:=false else CheckBox3.Checked:=true;
+if fileexists('C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\Timely Time Tracker.lnk') then CheckBox4.Checked:=true else CheckBox4.Checked:=false;
+
+
 
 
 //MAINTANANCE CHECK
 if (not fileexists('C:\ProgramData\TTS\disablequit.no') and not fileexists('C:\ProgramData\TTS\disablequit.in'))
 or (not fileexists('C:\ProgramData\TTS\forcequit60s.no') and not fileexists('C:\ProgramData\TTS\forcequit60s.in'))
+or (not fileexists('C:\ProgramData\TTS\allowaddbutton.no') and not fileexists('C:\ProgramData\TTS\allowaddbutton.in'))
 or (not fileexists('C:\ProgramData\TTS\normalmode.no') and not fileexists('C:\ProgramData\TTS\normalmode.in'))
 or (not fileexists('C:\ProgramData\TTS\remindersenabled.no') and not fileexists('C:\ProgramData\TTS\remindersenabled.in'))
 or (not fileexists('C:\ProgramData\TTS\dtwkedit.no') and not fileexists('C:\ProgramData\TTS\dtwkedit.in'))
@@ -172,20 +310,31 @@ or (not fileexists('C:\ProgramData\TTS\howlongwait.dat') and not fileexists('C:\
 or (not directoryexists('C:\ProgramData\TTS')) or (not directoryexists('C:\ProgramData\TTS\dts'))
 then begin
 MaintananceNeeded:=true;
-Label4.Font.Color:=clRed;
-Label4.Caption:='Error';
+Label4.Color:=clRed;
+Label4.Caption:=' Error ';
 Button4.Enabled:=true;
 
 end else begin
 MaintananceNeeded:=false;
-Label4.Font.Color:=clLime;
-Label4.Caption:='OK';
+Label4.Color:=clLime;
+Label4.Caption:=' OK ';
 Button4.Enabled:=false;
 end;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+
+//Theme Loader
+if fileexists('C:\ProgramData\TTS\modedark.dat') then begin
+  TStyleManager.SetStyle('Windows10 Dark');
+end else begin
+  TStyleManager.SetStyle('Windows10');
+end;
+//
+
+add:=add+1;
+node:=node+1;
 if fileexists('C:\ProgramData\TTS\dtwkedit.in') then begin
 Panel1.Left:=80;
 Button1.Enabled:=false;
@@ -196,6 +345,10 @@ Edit1.Enabled:=false;
 CheckBox1.Enabled:=false;
 CheckBox2.Enabled:=false;
 CheckBox3.Enabled:=false;
+CheckBox4.Enabled:=false;
+CheckBox5.Enabled:=false;
+InsFont.Enabled:=false;
+UnFont.Enabled:=false;
 Panel1.Show;
 end;
 checkdata();

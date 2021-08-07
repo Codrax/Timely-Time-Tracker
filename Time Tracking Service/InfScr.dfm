@@ -12,6 +12,7 @@ object Form1: TForm1
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  FormStyle = fsStayOnTop
   OldCreateOrder = False
   OnCreate = FormCreate
   PixelsPerInch = 96
@@ -2497,6 +2498,27 @@ object Form1: TForm1
     Font.Style = [fsBold]
     ParentFont = False
     Visible = False
+  end
+  object Add: TLabel
+    Left = 333
+    Top = 112
+    Width = 40
+    Height = 35
+    Hint = 'Add 1 hour'
+    AutoSize = False
+    Caption = ' +'
+    Color = clSilver
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -29
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+    ParentShowHint = False
+    ShowHint = True
+    Transparent = False
+    OnClick = AddClick
   end
   object SoundAlarm: TTimer
     Enabled = False

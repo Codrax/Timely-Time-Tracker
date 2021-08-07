@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Imaging.pngimage,
-  Vcl.ExtCtrls, MMSystem;
+  Vcl.ExtCtrls, MMSystem, Vcl.Themes;
 
 type
   TForm1 = class(TForm)
@@ -18,12 +18,14 @@ type
     SoundAlarm: TTimer;
     AutoStop: TTimer;
     tmr: TLabel;
+    Add: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure Label5Click(Sender: TObject);
     procedure SoundAlarmTimer(Sender: TObject);
     procedure Label4Click(Sender: TObject);
     procedure Label2Click(Sender: TObject);
     procedure AutoStopTimer(Sender: TObject);
+    procedure AddClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -33,6 +35,7 @@ type
 var
   Form1: TForm1;
   TimeTillStop: Integer =90;
+  BonusTime: Integer = 0;
 
 implementation
 
@@ -62,7 +65,20 @@ end;
 
 procedure TForm1.SoundAlarmTimer(Sender: TObject);
 begin
+if fileexists('C:\ProgramData\TTS\allowaddbutton.in') then Add.Show else Add.Hide;
+
+
+if fileexists('C:\Windows\Media\Alarm10.wav') then
  sndPlaySound('C:\Windows\Media\Alarm10.wav', SND_ASYNC);
+end;
+
+procedure TForm1.AddClick(Sender: TObject);
+begin
+SoundAlarm.Enabled:=false;
+Form1.Hide;
+BonusTime:=BonusTime+3600;
+AutoStop.Enabled:=false;
+TimeTillStop:=90;
 end;
 
 procedure TForm1.AutoStopTimer(Sender: TObject);
