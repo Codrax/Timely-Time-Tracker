@@ -290,7 +290,7 @@ read(A,temp);
 Edit1.Text:=temp;
 closefile(A);
 
-if fileexists('C:\ProgramData\TTS\allowaddbutton.no') then CheckBox1.Checked:=false else CheckBox1.Checked:=true;
+if fileexists('C:\ProgramData\TTS\allowaddbutton.no') then CheckBox5.Checked:=false else CheckBox5.Checked:=true;
 if fileexists('C:\ProgramData\TTS\disablequit.no') then CheckBox1.Checked:=true else CheckBox1.Checked:=false;
 if fileexists('C:\ProgramData\TTS\forcequit60s.no') then CheckBox2.Checked:=false else CheckBox2.Checked:=true;
 if fileexists('C:\ProgramData\TTS\remindersenabled.no') then CheckBox3.Checked:=false else CheckBox3.Checked:=true;

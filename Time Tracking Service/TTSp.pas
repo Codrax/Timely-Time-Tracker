@@ -69,6 +69,7 @@ begin
       assignfile(B,'C:\ProgramData\TTS\errorlog' + inttostr(calendar1.Day) + '.' + inttostr(calendar1.month) + '.' + inttostr(calendar1.year) + '.txt');
       rewrite(B);
       writeln(B,'Exception occured on: ' + datetostr(date) + ' at ' + timetostr(time));
+      writeln(B,'Reason: Variabile loaded from text file was not a valid integer value');
       closefile(B);
       sec:=0;
       end;
@@ -119,7 +120,7 @@ begin
     write(A,'-1');
     closefile(A);
   end;
-  if NOT fileexists('C:\ProgramData\TTS\dtwkedit.no') then begin
+  if NOT fileexists('C:\ProgramData\TTS\dtwkedit.no') and NOT fileexists('C:\ProgramData\TTS\dtwkedit.in') then begin
     assignfile(A,'C:\ProgramData\TTS\dtwkedit.no');
     rewrite(A);
     write(A,'-1');
