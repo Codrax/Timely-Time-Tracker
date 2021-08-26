@@ -19,6 +19,8 @@ type
     AutoStop: TTimer;
     tmr: TLabel;
     Add: TLabel;
+    crn1: TImage;
+    crn2: TImage;
     procedure FormCreate(Sender: TObject);
     procedure Label5Click(Sender: TObject);
     procedure SoundAlarmTimer(Sender: TObject);

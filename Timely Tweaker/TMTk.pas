@@ -4,7 +4,8 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, ShellAPI, Vcl.ExtCtrls, Vcl.Themes;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, ShellAPI, Vcl.ExtCtrls, Vcl.Themes, System.UITypes,
+  Vcl.Imaging.pngimage, Vcl.WinXCtrls, IOUtils;
 
 type
   TForm1 = class(TForm)
@@ -29,6 +30,20 @@ type
     GroupBox1: TGroupBox;
     Image1: TImage;
     CheckBox5: TCheckBox;
+    GroupBox2: TGroupBox;
+    GroupBox3: TGroupBox;
+    TrackDataChanges: TTimer;
+    rd1: TImage;
+    rd2: TImage;
+    closeapp: TLabel;
+    minimise: TLabel;
+    fontico: TImage;
+    around: TImage;
+    Label6: TLabel;
+    GroupBox4: TGroupBox;
+    StorUs: TLabel;
+    StorageData: TLabel;
+    DeleteData: TButton;
     procedure Button2Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -37,9 +52,17 @@ type
     procedure Button5Click(Sender: TObject);
     procedure InsFontClick(Sender: TObject);
     procedure UnFontClick(Sender: TObject);
-    procedure Button6Click(Sender: TObject);
+    procedure DeleteDataClick(Sender: TObject);
     procedure killcmdTimer(Sender: TObject);
     procedure Image1Click(Sender: TObject);
+    procedure TrackDataChangesTimer(Sender: TObject);
+    procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure closeappClick(Sender: TObject);
+    procedure minimiseClick(Sender: TObject);
+    procedure FontAnimationTimer(Sender: TObject);
+    procedure aroundMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+
   private
     { Private declarations }
   public
@@ -55,6 +78,33 @@ var
 implementation
 
 {$R *.dfm}
+
+function GetTreeSize ( path: string ): integer;
+var
+ tsr: TSearchRec;
+begin
+ result := 0;
+ path := IncludeTrailingBackSlash ( path );
+ if FindFirst ( path + '*', faAnyFile, tsr ) = 0 then begin
+  repeat
+   if ( tsr.attr and faDirectory ) > 0 then begin
+    if ( tsr.name <> '.' ) and ( tsr.name <> '..' ) then
+     inc ( result, GetTreeSize ( path + tsr.name ) );
+   end
+   else
+    inc ( result, tsr.size );
+  until FindNext ( tsr ) <> 0;
+  FindClose ( tsr );
+ end;
+end;
+
+procedure TForm1.aroundMouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+begin
+ReleaseCapture;
+
+SendMessage(Form1.Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+end;
 
 procedure TForm1.Button1Click(Sender: TObject);
 var
@@ -142,7 +192,7 @@ begin
 WinExec('cmd /k "taskkill /f /im "TTSm.exe""', SW_SHOW);
 WinExec('cmd /k "taskkill /f /im "cmd.exe""', SW_SHOW);
 ShellExecute(Handle, 'open', 'C:\Program Files\Timely Time Tracker\TTSm.exe', nil, nil, SW_SHOWNORMAL);
-ShowMessage('You may now close the COmmand Prompt');
+ShowMessage('You may now close the Command Prompt');
 
 if not directoryexists('C:\ProgramData\TTS\') then mkdir('C:\ProgramData\TTS\');
 if not directoryexists('C:\ProgramData\TTS\dts') then mkdir('C:\ProgramData\TTS\dts');
@@ -195,9 +245,16 @@ begin
 Application.Terminate;
 end;
 
-procedure TForm1.Button6Click(Sender: TObject);
+procedure TForm1.DeleteDataClick(Sender: TObject);
 begin
-ShellExecute(0, 'open', 'cmd.exe', PChar(' /k "winver"'), nil, SW_SHOW);
+if MessageDlg('Are you sure you want to delete ALL the computer usage files? This action is irreversibie', mtWarning, [mbYes, mbNo], 0) = mrYes then begin
+
+  TDirectory.Delete('C:\ProgramData\TTS\dts', true);
+mkdir('C:\ProgramData\TTS\dts');
+StorageData.Caption:=(inttostr(GetTreeSize('C:\ProgramData\TTS\dts'))) + ' B';
+MessageDlg('All the files were deleted.', mtInformation, [mbClose], 0);
+
+  end;
 end;
 
 procedure TForm1.Image1Click(Sender: TObject);
@@ -208,20 +265,18 @@ if add=5 then begin
   assignfile(J,'C:\ProgramData\TTS\enabledebug.in');
   rewrite(J);
   closefile(J);
-  label2.Caption:='Timely Options.';
+  label2.Caption:='- Timely Options. -';
 end
 else add:=0;
 
 
 if node=15 then begin
-  label2.Caption:='Timely .Options';
-
   if MessageDlg('Are you sure you want to disable "Timely Tweaker"? This action can only be reverted by modifying the disable data file of Timely Time Tracker.', mtConfirmation, [mbYes, mbNo], 0) = mrYes then begin
   deletefile('C:\ProgramData\TTS\dtwkedit.no');
   assignfile(J,'C:\ProgramData\TTS\dtwkedit.in');
   rewrite(J);
   closefile(J);
-  label2.Caption:='Timely .Options (Disables on next launch)';
+  label2.Caption:='- (Close to disable) -';
 
   end;
 end
@@ -233,7 +288,8 @@ procedure TForm1.InsFontClick(Sender: TObject);
 var
 ResStream: TResourceStream;
 begin
-
+fontico.Show;
+fontico.Top:=40;
 
 
 //EXTRACT FONTS
@@ -271,8 +327,27 @@ begin
 ShellExecute(0, 'runas', 'cmd.exe', PChar(' /k "taskkill /f /im cmd.exe"'), nil, SW_SHOW);
 end;
 
+procedure TForm1.minimiseClick(Sender: TObject);
+begin
+Application.Minimize;
+end;
+
+procedure TForm1.TrackDataChangesTimer(Sender: TObject);
+begin
+//Theme Loader
+if fileexists('C:\ProgramData\TTS\modedark.dat') then begin
+  TStyleManager.SetStyle('Windows10 Dark');
+end else begin
+  TStyleManager.SetStyle('Windows10');
+end;
+//
+end;
+
 procedure TForm1.UnFontClick(Sender: TObject);
 begin
+fontico.Show;
+fontico.Top:=80;
+
 RemoveFontResource('C:\ProgramData\TTS\fonts\Nexa Light.otf');
 RemoveFontResource('C:\ProgramData\TTS\fonts\Nexa Bold.otf');
 SendMessage(HWND_BROADCAST,WM_FONTCHANGE,0,0);
@@ -322,8 +397,25 @@ Button4.Enabled:=false;
 end;
 end;
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TForm1.closeappClick(Sender: TObject);
 begin
+Application.Terminate;
+end;
+
+procedure TForm1.FontAnimationTimer(Sender: TObject);
+begin
+if insfont.Enabled=false then fontico.Top:=40 else fontico.top:=80;
+
+InsFont.Enabled:=true;
+UnFont.Enabled:=true;
+insfont.Show;
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+var
+test: String;
+begin
+StorageData.Caption:=(inttostr(GetTreeSize('C:\ProgramData\TTS\dts'))) + ' B';
 
 //Theme Loader
 if fileexists('C:\ProgramData\TTS\modedark.dat') then begin
@@ -336,11 +428,12 @@ end;
 add:=add+1;
 node:=node+1;
 if fileexists('C:\ProgramData\TTS\dtwkedit.in') then begin
-Panel1.Left:=80;
+Panel1.Left:=95;
 Button1.Enabled:=false;
 Button2.Enabled:=false;
 Button3.Enabled:=false;
 Button4.Enabled:=false;
+DeleteData.Enabled:=false;
 Edit1.Enabled:=false;
 CheckBox1.Enabled:=false;
 CheckBox2.Enabled:=false;
@@ -354,6 +447,13 @@ end;
 checkdata();
 
 
+end;
+
+procedure TForm1.FormMouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+begin
+ReleaseCapture;
+SendMessage(Form1.Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0);
 end;
 
 end.

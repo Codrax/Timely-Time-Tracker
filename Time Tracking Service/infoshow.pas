@@ -15,6 +15,8 @@ type
     Label3: TLabel;
     ShowAN: TTimer;
     Timer1: TTimer;
+    crn1: TImage;
+    crn2: TImage;
     procedure ShowANTimer(Sender: TObject);
     procedure Label1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
