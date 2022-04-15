@@ -9,25 +9,29 @@ uses
 
 type
   TForm1 = class(TForm)
-    Image1: TImage;
-    Label1: TLabel;
-    Label2: TLabel;
-    Label3: TLabel;
-    Label4: TLabel;
-    Label5: TLabel;
+    ico: TImage;
+    Title: TLabel;
+    DMtx: TLabel;
+    DMbg: TLabel;
+    SDtx: TLabel;
+    SDbg: TLabel;
     SoundAlarm: TTimer;
     AutoStop: TTimer;
     tmr: TLabel;
     Add: TLabel;
     crn1: TImage;
     crn2: TImage;
+    border: TImage;
+    ShowAN: TTimer;
+    HideAN: TTimer;
     procedure FormCreate(Sender: TObject);
-    procedure Label5Click(Sender: TObject);
     procedure SoundAlarmTimer(Sender: TObject);
-    procedure Label4Click(Sender: TObject);
-    procedure Label2Click(Sender: TObject);
+    procedure PowerOffPC(Sender: TObject);
+    procedure Dism(Sender: TObject);
     procedure AutoStopTimer(Sender: TObject);
     procedure AddClick(Sender: TObject);
+    procedure ShowANTimer(Sender: TObject);
+    procedure HideANTimer(Sender: TObject);
   private
     { Private declarations }
   public
@@ -38,59 +42,78 @@ var
   Form1: TForm1;
   TimeTillStop: Integer =90;
   BonusTime: Integer = 0;
+  MusicOption1: Integer;
+  i: integer;
 
 implementation
+
+uses
+  TTSp;
 
 {$R *.dfm}
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-Form1.Top:=50;
-Form1.Left:=screen.Width-(form1.Width+100)
+  Form1.Top:=30;
+  Form1.Left:=screen.Width-(form1.Width+100)
 end;
 
-procedure TForm1.Label2Click(Sender: TObject);
+procedure TForm1.HideANTimer(Sender: TObject);
 begin
-SoundAlarm.Enabled:=false;
-Form1.Hide;
+  if i > 12 then
+    Self.Left := Self.Left + 60
+  else begin
+    Self.Left := Self.Left - (20 - 2 * i);
+    i := i + 1;
+  end;
+  if Self.Left >= Screen.DesktopWidth then begin HideAN.Enabled:=false; end;
 end;
 
-procedure TForm1.Label4Click(Sender: TObject);
+procedure TForm1.Dism(Sender: TObject);
 begin
-WinExec('cmd /k "shutdown /s"', SW_SHOW);
+  SoundAlarm.Enabled:=false;
+  sndPlaySound(nil, 0);
+  i := 0;
+  HideAN.Enabled := true;
 end;
 
-procedure TForm1.Label5Click(Sender: TObject);
+procedure TForm1.PowerOffPC(Sender: TObject);
 begin
-WinExec('cmd /k "shutdown /s"', SW_SHOW);
+  WinExec('shutdown /p', SW_SHOW);
+end;
+
+procedure TForm1.ShowANTimer(Sender: TObject);
+begin
+  HideAn.Enabled := false;
+  Self.Show;
+  Self.Left := Self.Left-40;
+  if Self.Left <= Screen.DesktopWidth - Self.Width - 20 then begin ShowAN.Enabled:=false; end;
 end;
 
 procedure TForm1.SoundAlarmTimer(Sender: TObject);
 begin
-if fileexists('C:\ProgramData\TTS\allowaddbutton.in') then Add.Show else Add.Hide;
+if fileexists(datalocation + 'allowaddbutton.in') then Add.Show else Add.Hide;
 
-
-if fileexists('C:\Windows\Media\Alarm10.wav') then
- sndPlaySound('C:\Windows\Media\Alarm10.wav', SND_ASYNC);
+TTS.SelectMusicOption;
 end;
 
 procedure TForm1.AddClick(Sender: TObject);
 begin
-SoundAlarm.Enabled:=false;
-Form1.Hide;
-BonusTime:=BonusTime+3600;
-AutoStop.Enabled:=false;
-TimeTillStop:=90;
+  SoundAlarm.Enabled:=false;
+  Form1.Hide;
+  BonusTime:=BonusTime+3600;
+  AutoStop.Enabled:=false;
+  TimeTillStop:=90;
+  sndPlaySound(nil, 0);
 end;
 
 procedure TForm1.AutoStopTimer(Sender: TObject);
 begin
-tmr.Caption:=inttostr(TimeTIllStop);
-TimeTillStop:=TimeTillStop-1;
-if TimeTillStop<1 then begin
-WinExec('cmd /k "shutdown /s"', SW_SHOW);
-WinExec('cmd /k "shutdown /s"', SW_SHOW);
-AutoStop.Enabled:=false;
+  tmr.Caption:=inttostr(TimeTIllStop);
+  TimeTillStop:=TimeTillStop-1;
+  if TimeTillStop<1 then begin
+  PowerOffPC(nil);
+  AutoStop.Enabled:=false;
 end;
 end;
 

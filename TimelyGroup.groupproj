@@ -1,0 +1,60 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{3924E7E7-C708-42F7-BB28-B35018BD0028}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="Time Tracking Service\TTSm.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Time Tracker UI\TTU.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Timely Tweaker\TTTK.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="TTSm">
+        <MSBuild Projects="Time Tracking Service\TTSm.dproj"/>
+    </Target>
+    <Target Name="TTSm:Clean">
+        <MSBuild Projects="Time Tracking Service\TTSm.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TTSm:Make">
+        <MSBuild Projects="Time Tracking Service\TTSm.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="TTU">
+        <MSBuild Projects="Time Tracker UI\TTU.dproj"/>
+    </Target>
+    <Target Name="TTU:Clean">
+        <MSBuild Projects="Time Tracker UI\TTU.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TTU:Make">
+        <MSBuild Projects="Time Tracker UI\TTU.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="TTTK">
+        <MSBuild Projects="Timely Tweaker\TTTK.dproj"/>
+    </Target>
+    <Target Name="TTTK:Clean">
+        <MSBuild Projects="Timely Tweaker\TTTK.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TTTK:Make">
+        <MSBuild Projects="Timely Tweaker\TTTK.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="TTSm;TTU;TTTK"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="TTSm:Clean;TTU:Clean;TTTK:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="TTSm:Make;TTU:Make;TTTK:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

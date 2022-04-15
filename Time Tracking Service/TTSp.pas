@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, MMSystem, Vcl.ExtCtrls, Vcl.Menus,
-  Vcl.ComCtrls, Vcl.Grids, Vcl.Samples.Calendar, InfScr, infoshow, Vcl.Themes;
+  Vcl.ComCtrls, Vcl.Grids, Vcl.Samples.Calendar, InfScr, infoshow, Vcl.Themes, DateUtils, TimelyLib;
 
 type
   TTTS = class(TForm)
@@ -13,143 +13,378 @@ type
     TrayIcon1: TTrayIcon;
     PopupMenu1: TPopupMenu;
     UIO: TMenuItem;
-    Exit: TMenuItem;
+    Exit1: TMenuItem;
     N1: TMenuItem;
     Calendar1: TCalendar;
     ManageSettings1: TMenuItem;
     StartCheck500ms: TTimer;
+    AppsUsageSync: TTimer;
     procedure TRTimer(Sender: TObject);
-    procedure ExitClick(Sender: TObject);
+    procedure Exit1Click(Sender: TObject);
     procedure UIOClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure ManageSettings1Click(Sender: TObject);
     procedure StartCheck500msTimer(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure AppsUsageSyncTimer(Sender: TObject);
+  private
+    procedure log(text: string; date: boolean; time: boolean);
+    procedure CheckForTimerExpire;
+    procedure InitAlarmExpire;
+    procedure ExtractMusic;
+    function truncexe(filename: string; forcetrunc: boolean = false): string;
+    function SmartCaptionParse(caption, exe: string): string;
+    function IdleTime: DWord;
+    function QuickRead(filename: string): string;
   protected
     procedure CreateParams(var Params: TCreateParams); override;
+  public
+    procedure SelectMusicOption;
   end;
 
-
 var
+  enablelogging, logonce: boolean;
   TTS: TTTS;
+
   sec: Integer;
-  F: textfile;
-  temp: string;
+  temp,
+  themenow,
+  datalocation,
   filename: string;
   timetostop: Integer;
-  NewDate: Integer;
-  OldDate: Integer;
+  NewDate,
+  OldDate,
+  lastsecond,
+  MusicOption: Integer;
+  idlestrictness: integer = 0;
+
+  enablefilenametrunc: boolean = false;
+  errorno: boolean = false;
 
 implementation
 
 {$R *.dfm}
 
+uses
+  Debug1;
+
+function TTTS.IdleTime: DWord;
+var
+  LastInput: TLastInputInfo;
+begin
+  LastInput.cbSize := SizeOf(TLastInputInfo);
+  GetLastInputInfo(LastInput);
+  Result := (GetTickCount - LastInput.dwTime) DIV 1000;
+end;
+
+procedure TTTS.ExtractMusic;
+var
+ResStream: TResourceStream;
+begin
+  ResStream := TResourceStream.Create(HInstance, 'Resource_1', RT_RCDATA);
+  try
+    ResStream.Position := 1;
+    ResStream.SaveToFile(datalocation + 'music\classic.wav');
+  finally
+    ResStream.Free;
+  end;
+  ResStream := TResourceStream.Create(HInstance, 'Resource_2', RT_RCDATA);
+  try
+    ResStream.Position := 1;
+    ResStream.SaveToFile(datalocation + 'music\electric.wav');
+  finally
+    ResStream.Free;
+  end;
+  ResStream := TResourceStream.Create(HInstance, 'Resource_3', RT_RCDATA);
+  try
+    ResStream.Position := 1;
+    ResStream.SaveToFile(datalocation + 'music\flute.wav');
+  finally
+    ResStream.Free;
+  end;
+  ResStream := TResourceStream.Create(HInstance, 'Resource_4', RT_RCDATA);
+  try
+    ResStream.Position := 1;
+    ResStream.SaveToFile(datalocation + 'music\loudbell.wav');
+  finally
+    ResStream.Free;
+  end;
+end;
+
+procedure TTTS.AppsUsageSyncTimer(Sender: TObject);
+var
+  FD: TStringList;
+  btm,
+  usage,
+  wline: integer;
+  fnm,
+  afile,
+  exen,
+  capt: string;
+begin
+  btm := AppsUsageSync.Interval div 1000;
+
+  fnm := inttostr(calendar1.Day) + inttostr(calendar1.Month) + inttostr(calendar1.Year);
+  afile := 'C:\Users\' + WUSername + '\AppData\Local\TTS\dts\' + fnm + '-app-usage.dat';
+
+  try
+    exen := truncexe(GetFileName);
+    capt := SmartCaptionParse(trim(GetCurrentAppName),truncexe(exen, true));
+  except
+
+  end;
+  usage := 0;
+
+  if (exen = '') then Exit;
+  if (capt = '') then capt := 'Unknown Title';
+
+
+  fd := TStringList.Create;
+  try
+    if fileexists(afile) then
+    begin
+      fd.LoadFromFile(afile);
+      wline := fd.IndexOf(exen);
+    end else wline := -1;
+
+    if wline <> -1 then begin
+      try
+        usage := strtoint(fd[wline + 2]) + btm;
+      except
+        usage := 0;
+      end;
+      fd[wline + 1] := capt;
+      fd[wline + 2] := inttostr(usage);
+    end else begin
+      fd.Add( exen );
+      fd.Add( capt );
+      fd.Add( inttostr(usage) );
+    end;
+    fd.SaveToFile(afile);
+  finally
+    fd.Free;
+  end;
+end;
+
+procedure TTTS.CheckForTimerExpire;
+begin
+  Form1.SoundAlarm.Enabled := false;
+  if fileexists(datalocation + 'forcequit60s.in') or (Form3.CheckBox2.Checked) then begin
+       Form1.AutoStop.Enabled:=true;
+       Form1.DMtx.Hide;
+       Form1.DMbg.Hide;
+       Form1.tmr.Caption := '90';
+       TimeTillStop := 89;
+       Form1.SDtx.Width:=350;
+       Form1.SDbg.Width:=350;
+       Form1.tmr.Show;
+    end else begin
+      Form1.AutoStop.Enabled:=false;
+       Form1.DMtx.Show;
+       Form1.DMbg.Show;
+       Form1.SDtx.Width:=180;
+       Form1.SDbg.Width:=180;
+       Form1.tmr.Hide;
+    end;
+    Form1.SoundAlarm.Enabled := true;
+end;
+
 procedure TTTS.CreateParams(var Params: TCreateParams);
 var
-A: textfile;
-B: textfile;
+  A: textfile;
+  i: integer;
+  st, st2: TStringList;
 begin
   inherited;
+  datalocation := 'C:\Users\' + WUSername + '\AppData\Local\TTS\';
+
   Params.ExStyle := Params.ExStyle and not WS_EX_APPWINDOW;
   Params.WndParent := Application.Handle;
 
   calendar1.Update;
   filename:=inttostr(calendar1.Day) + inttostr(calendar1.Month) + inttostr(calendar1.Year);
+
      //Prepare File/Data
-  if NOT (directoryexists('C:\ProgramData\TTS')) then mkdir('C:\ProgramData\TTS');
-  if NOT (directoryexists('C:\ProgramData\TTS\dts')) then mkdir('C:\ProgramData\TTS\dts');
+  if NOT (directoryexists(datalocation)) then mkdir(datalocation);
+  if NOT (directoryexists(datalocation + 'music')) then mkdir(datalocation + 'music');
+  if NOT (directoryexists(datalocation + 'dts')) then mkdir(datalocation + 'dts');
+  if (not fileexists(datalocation + 'music\classic.wav')) or (not fileexists(datalocation + 'music\electric.wav'))  or (not fileexists(datalocation + 'music\flute.wav')) or (not fileexists(datalocation + 'music\loudbell.wav')) then ExtractMusic;
+
       //Check for existing data
-  if fileexists('C:\ProgramData\TTS\dts\' + filename + '.dat') then try begin
-    assignfile(F,'C:\ProgramData\TTS\dts\' + filename + '.dat');
-    reset(F);
-    read(F,temp);
+  if fileexists(datalocation + 'dts\' + filename + '.dat') then
+  begin
+    st := TStringList.Create;
+    try
+    st.LoadFromFile(datalocation + 'dts\' + filename + '.dat');
       //Load File
       try
-      if strtoint(temp)>0 then sec:=strtoint(temp);
+        i := strtoint(st[0]);
+        if i > 0 then sec := i;
       except
-      assignfile(B,'C:\ProgramData\TTS\errorlog' + inttostr(calendar1.Day) + '.' + inttostr(calendar1.month) + '.' + inttostr(calendar1.year) + '.txt');
-      rewrite(B);
-      writeln(B,'Exception occured on: ' + datetostr(date) + ' at ' + timetostr(time));
-      writeln(B,'Reason: Variabile loaded from text file was not a valid integer value');
-      closefile(B);
+        log('(!) EXCEPTION OCCURED WHEN CONVERTING SEC. Temp Value:' + temp ,true,true);
+
+        st2 := TStringList.Create;
+        try
+          st2.Add('Exception occured on: ' + datetostr(date) + ' at ' + timetostr(time));
+          st2.Add('Reason: Variabile loaded from text file was not a valid integer value');
+          st2.SaveToFile(datalocation + 'errorlog' + inttostr(calendar1.Day) + '.' + inttostr(calendar1.month) + '.' + inttostr(calendar1.year) + '.txt');
+        finally
+          st2.Free;
+        end;
+
       sec:=0;
       end;
 
-    end
     finally
-    closefile(F);
+      st.Free;
+    //log('(!) EXCEPTION OCCURED WHEN READING SEC. Temp Value:' + temp ,true,true);
+    end;
   end;
      //Open for writing
 
 
      //create other files
-  if NOT (fileexists('C:\ProgramData\TTS\allowaddbutton.no')) and NOT (fileexists('C:\ProgramData\TTS\allowaddbutton.in')) then begin
-    assignfile(A,'C:\ProgramData\TTS\allowaddbutton.no');
+     try
+  if NOT (fileexists(datalocation + 'allowaddbutton.no')) and NOT (fileexists(datalocation + 'allowaddbutton.in')) then begin
+    assignfile(A,datalocation + 'allowaddbutton.no');
     rewrite(A);
     closefile(A);
   end;
-  if NOT fileexists('C:\ProgramData\TTS\howlongwait.dat') then begin
-    assignfile(A,'C:\ProgramData\TTS\howlongwait.dat');
+  if NOT fileexists(datalocation + 'howlongwait.dat') then begin
+    assignfile(A,datalocation + 'howlongwait.dat');
     rewrite(A);
     write(A,'-1');
     closefile(A);
   end;
-  if NOT (fileexists('C:\ProgramData\TTS\disablequit.no')) and NOT (fileexists('C:\ProgramData\TTS\disablequit.in')) then begin
-    assignfile(A,'C:\ProgramData\TTS\disablequit.no');
+  if NOT (fileexists(datalocation + 'disablequit.no')) and NOT (fileexists(datalocation + 'disablequit.in')) then begin
+    assignfile(A,datalocation + 'disablequit.no');
     rewrite(A);
     closefile(A);
   end;
-  if NOT (fileexists('C:\ProgramData\TTS\forcequit60s.no')) and NOT (fileexists('C:\ProgramData\TTS\forcequit60s.in')) then begin
-    assignfile(A,'C:\ProgramData\TTS\forcequit60s.no');
+  if NOT (fileexists(datalocation + 'forcequit60s.no')) and NOT (fileexists(datalocation + 'forcequit60s.in')) then begin
+    assignfile(A,datalocation + 'forcequit60s.no');
     rewrite(A);
     closefile(A);
   end;
-  if NOT (fileexists('C:\ProgramData\TTS\remindersenabled.no')) and NOT (fileexists('C:\ProgramData\TTS\remindersenabled.in')) then begin
-    assignfile(A,'C:\ProgramData\TTS\remindersenabled.in');
+  if NOT (fileexists(datalocation + 'remindersenabled.no')) and NOT (fileexists(datalocation + 'remindersenabled.in')) then begin
+    assignfile(A,datalocation + 'remindersenabled.in');
     rewrite(A);
     closefile(A);
   end;
-  if NOT fileexists('C:\ProgramData\TTS\howlongwait.dat') then begin
-    assignfile(A,'C:\ProgramData\TTS\howlongwait.dat');
+  if NOT fileexists(datalocation + 'howlongwait.dat') then begin
+    assignfile(A,datalocation + 'howlongwait.dat');
     rewrite(A);
     write(A,'-1');
     closefile(A);
   end;
-  if NOT fileexists('C:\ProgramData\TTS\normalmode.in') then begin
-    assignfile(A,'C:\ProgramData\TTS\normalmode.in');
+  if NOT fileexists(datalocation + 'normalmode.in') then begin
+    assignfile(A,datalocation + 'normalmode.in');
+    rewrite(A);
+    closefile(A);
+  end;
+  if NOT fileexists(datalocation + 'songchoice.dat') then begin
+    assignfile(A,datalocation + 'songchoice.dat');
+    rewrite(A);
+    write(A,'1');
+    closefile(A);
+  end;
+  if NOT fileexists(datalocation + 'dtwkedit.no') and NOT fileexists(datalocation + 'dtwkedit.in') then begin
+    assignfile(A,datalocation + 'dtwkedit.no');
     rewrite(A);
     write(A,'-1');
     closefile(A);
   end;
-  if NOT fileexists('C:\ProgramData\TTS\dtwkedit.no') and NOT fileexists('C:\ProgramData\TTS\dtwkedit.in') then begin
-    assignfile(A,'C:\ProgramData\TTS\dtwkedit.no');
-    rewrite(A);
-    write(A,'-1');
-    closefile(A);
+  except
+      log('(!) EXCEPTION OCCURED WHEN CREATING FILES.' ,true,true);
+  end;
+
+
+
+  if fileexists(datalocation + 'songchoice.dat') then begin
+  //OTHER DATA READER
+    st2 := TStringList.Create;
+    try
+      st2.LoadFromFile(datalocation + 'songchoice.dat');
+      try
+        MusicOption:= strtoint(st2[0]);
+      except
+        deletefile(datalocation + 'songchoice.dat');
+        log('(!) EXCEPTION OCCURED WHEN READING & CONVERTING SONG CHOICE! Temp Value: ' + st2[0] ,true,true);
+      end;
+    finally
+      st2.Free;
+
+    end;
   end;
 end;
 
 
 
-procedure TTTS.ExitClick(Sender: TObject);
+procedure TTTS.Exit1Click(Sender: TObject);
 begin
-Application.Terminate;
+Application.MainForm.Close;
+end;
+
+procedure TTTS.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+log('' ,false,false);
+log('///PROGRAM CLOSED QUERY///' ,true,true);
+log('' ,false,false);
 end;
 
 procedure TTTS.FormCreate(Sender: TObject);
 
 begin
 //Theme Loader
-if fileexists('C:\ProgramData\TTS\modedark.dat') then begin
+if fileexists(datalocation + 'modedark.dat') then begin
   TStyleManager.SetStyle('Windows10 Dark');
+  themenow:='dark';
 end else begin
   TStyleManager.SetStyle('Windows10');
+  themenow:='light';
 end;
 
-if fileexists('C:\ProgramData\TTS\disablequit.in') then Exit.Enabled:=false;
+
+if fileexists(datalocation + 'disablequit.in') then Exit1.Enabled:=false;
+
+if Exit1.Enabled=false then log('Allow Quiting: false' ,false,false) else log('Allow Quiting: true' ,false,false);
 
 TTS.Hide;
 TTS.Width:=1;
 TTS.Height:=1;
+end;
+
+procedure TTTS.InitAlarmExpire;
+begin
+  begin
+  MusicOption1:=MusicOption;
+  SelectMusicOption;
+      Form1.Left := screen.DesktopWidth + Form1.Width;
+      Form1.SoundAlarm.Enabled:=true;
+      Form1.showAn.Enabled := true;
+      CheckForTimerExpire;
+  end;
+end;
+
+procedure TTTS.log(text: string; date, time: boolean);
+var
+  logstr: string;
+  L: textfile;
+begin
+if (enablelogging=true) then begin
+
+  logstr:=logstr+ text;
+  if time=true then logstr:=logstr + ' Time: ' + timetostr(now);
+  if date=true then logstr:=logstr + ' Date: ' + datetostr(now);
+
+  if directoryexists(datalocation + '') then begin
+    AssignFile(L,datalocation + 'log.txt');
+    if fileexists(datalocation + 'log.txt') then Append(L) else Rewrite(L);
+    WriteLn(L,logstr);
+    CloseFile(L);
+  end;
+
+end;
 end;
 
 procedure TTTS.ManageSettings1Click(Sender: TObject);
@@ -157,112 +392,248 @@ begin
 WinExec('C:\Program Files\Timely Time Tracker\Tweaker.exe', SW_SHOW);
 end;
 
+function TTTS.QuickRead(filename: string): string;
+var
+  ts: TStringList;
+begin
+  if not fileexists(filename) then Exit;
+  ts := TStringList.Create;
+  try
+    try ts.LoadFromFile(filename); except end;
+    Result := trim(ts.Text);
+  finally
+    ts.Free;
+  end;
+end;
+
+procedure TTTS.SelectMusicOption;
+begin
+  case MusicOption of
+  1:
+  if fileexists('C:\Windows\Media\Alarm10.wav') then begin Form1.SoundAlarm.Interval:=4500; sndPlaySound('C:\Windows\Media\Alarm10.wav', SND_ASYNC); end;
+  2:
+  if fileexists( PChar( datalocation + 'music\classic.wav' )) then begin Form1.SoundAlarm.Interval:=8000; sndPlaySound( PChar( datalocation + 'music\classic.wav' ), SND_ASYNC); end;
+  3:
+  if fileexists( PChar( datalocation + 'music\electric.wav' ) ) then begin Form1.SoundAlarm.Interval:=8000; sndPlaySound( PChar( datalocation + 'music\electric.wav' ), SND_ASYNC); end;
+  4:
+  if fileexists( PChar( datalocation + 'music\flute.wav' ) ) then begin Form1.SoundAlarm.Interval:=8000; sndPlaySound( PChar( datalocation + 'music\flute.wav' ), SND_ASYNC); end;
+  5:
+  if fileexists( PChar( datalocation + 'music\loudbell.wav' ) ) then begin Form1.SoundAlarm.Interval:=8150; sndPlaySound( PChar( datalocation + 'music\loudbell.wav' ), SND_ASYNC); end;
+  end;
+end;
+
+function TTTS.SmartCaptionParse(caption, exe: string): string;
+var
+  a: integer;
+begin
+  if exe = 'cmd.exe' then
+    Result := 'Command Prompt'
+  else
+if exe = 'chrome.exe' then
+    Result := 'Google Chrome'
+  else
+if exe = 'msedge.exe' then
+    Result := 'Microsoft Edge'
+  else
+if exe = 'notepad++.exe' then
+    Result := 'Notepad ++'
+  else
+if exe = 'explorer.exe' then
+    Result := 'Windows Explorer'
+  else
+if exe = 'powershell.exe' then
+    Result := 'Windows PowerShell'
+  else  begin
+    a := PosLast(' - ',caption) + 3;
+    if a = 3 then a := 0;
+    
+    Result := Copy( caption, a, caption.Length );
+  end;
+
+end;
+
 procedure TTTS.StartCheck500msTimer(Sender: TObject);
 begin
-if (sec>timetostop) and not (timetostop = -1) then begin
-      sndPlaySound('C:\Windows\Media\Alarm10.wav', SND_ASYNC);
-      Form1.SoundAlarm.Enabled:=true;
-      Form1.Show;
-      if fileexists('C:\ProgramData\TTS\forcequit60s.in') then begin
-       Form1.AutoStop.Enabled:=true;
-       Form1.Label3.Hide;
-       Form1.Label2.Hide;
-       Form1.Label4.Width:=340;
-       Form1.Label5.Left:=120;
-       Form1.tmr.Show;
-    end; end;
+if (sec>timetostop) and not (timetostop = -1) then InitAlarmExpire;
 
   StartCheck500ms.Enabled:=false;
 end;
 
 procedure TTTS.TRTimer(Sender: TObject);
 var
-temptime: String;
-T: textfile;
-tempstop: String;
+  st: TStringList;
 begin
-//Load time to stop alarm
-if fileexists('C:\ProgramData\TTS\howlongwait.dat') then begin
-    assignfile(T,'C:\ProgramData\TTS\howlongwait.dat');
-    reset(T);
-    read(T,tempstop);
-    timetostop:=strtoint(tempstop) + BonusTime;
-    if fileexists('C:\ProgramData\TTS\allowaddbutton.in') then Form1.Add.Show else Form1.Add.Hide;
-    closefile(T);
+try
+  idlestrictness := strtoint( QuickRead(datalocation + 'idletime.dat') );
+except end;
+
+if (idlestrictness <> 0) then begin
+  case idlestrictness of
+    1: if (IdleTime > 60) then Exit;
+    2: if (IdleTime > 180) then Exit;
+    3: try
+      if (truncexe('GetFileName',true) = 'explorer.exe') and (IdleTime > 360) then Exit;
+    except
+
+    end;
   end;
+end;
+
+
+if logonce=false then begin
+  log(' ',false,false);
+  log('////////////////////////////////////////////////////////////////////////////////////////////',false,false);
+  log(' ',false,false);
+  log('                                Timely Time Tracker Debug Log                              ',false,false);
+  log('                                            v2.1                                            ',false,false);
+  log(' ',false,false);
+  log('////////////////////////////////////////////////////////////////////////////////////////////',false,false);
+  log(' ',false,false);
+  log('Start Time: ',true,true);
+  log('Value of sec is: ' + inttostr(sec) ,false,false);
+  log('' ,false,false);
+  log('-Variabiles: ',false,false);
+  if themenow='light' then log('Theme: LIGHT',false,false) else log('Theme: DARK',false,false);
+end;
+
+if fileexists(datalocation + 'modedark.dat') then begin
+  if themenow='light' then begin
+    TStyleManager.SetStyle('Windows10 Dark');
+    log('Theme Changed to: LIGHT',false,true);
+    TTS.Show;
+    TTS.SetFocus;
+    TTS.Hide;
+    themenow:='dark';
+  end;
+end else begin
+  if themenow='dark' then begin
+    TStyleManager.SetStyle('Windows10');
+    log('(i) Theme Changed to: LIGHT',false,true);
+    TTS.Show;
+    TTS.SetFocus;
+    TTS.Hide;
+    themenow:='light';
+  end;
+end;
+
+
+//Load time to stop alarm
+st := TStringList.Create;
+if fileexists(datalocation + 'howlongwait.dat') then begin
+  try
+    st := TStringList.Create;
+    st.LoadFromFile(datalocation + 'howlongwait.dat');
+    timetostop:=strtoint(st[0]) + BonusTime;
+  finally
+    st.Free;
+  end;
+    if fileexists(datalocation + 'allowaddbutton.in') then Form1.Add.Show else Form1.Add.Hide;
+  end;
+
+  //log('(!) EXCEPTION OCCURED WHEN LOADING TIMETOSTOP! Temp Value:' + tempstop ,true,true);
+
+
 //  In case of next day
 OldDate:=Calendar1.Day;
 Calendar1.CalendarDate:=Date;
 NewDate:=Calendar1.Day;
 
 if NewDate>OldDate then sec:=0;
-temptime:=datetostr(date);
+
 //
 filename:=inttostr(calendar1.Day) + inttostr(calendar1.Month) + inttostr(calendar1.Year);
 TTS.Hide;
-Sec:=sec+1;
-assignfile(F,'C:\ProgramData\TTS\dts\' + filename + '.dat');
-  rewrite(F);
-  write (F,inttostr(sec));
+
+sec := sec + TR.Interval div 1000;
+lastsecond:=SecondOfTheDay(Now);
+
+
+st := TStringList.Create;
+try
+  st.Add(inttostr(sec));
+  st.SaveToFile(datalocation + 'dts\' + filename + '.dat');
+except begin
+  st.Free;
+  {
+  log('(!) EXCEPTION OCCURED WHEN WRITING SEC TO FILE! Acces could be denied?' + tempstop ,true,true);
+  if errorno=false then begin
+    ShowMessage('It Appears acess to the TTT data file was denied. This will be logged');
+    assignfile(F,datalocation + 'deniedacess.txt');
+    append(F);
+    tmpdat:='Acess denied to data file. Sec = ' + inttostr(Sec) + ' Time of event: ' + datetostr(Now) + ' ' + timetostr(Now);
+    WriteLn(F,tmpdat);
   CloseFile(F);
+  end;
+  errorno:=true;       }
+end;
+
+end;
 
   //IF TIMES UP
-  if sec=timetostop then begin
-      if fileexists('C:\Windows\Media\Alarm10.wav') then
- sndPlaySound('C:\Windows\Media\Alarm10.wav', SND_ASYNC);
-      Form1.SoundAlarm.Enabled:=true;
-      Form1.Show;
-      if fileexists('C:\ProgramData\TTS\forcequit60s.in') then begin
-       Form1.AutoStop.Enabled:=true;
-       Form1.Label3.Hide;
-       Form1.Label2.Hide;
-       Form1.Label4.Width:=340;
-       Form1.Label5.Left:=120;
-       Form1.tmr.Show;
-    end;
-  end;
-
-  if fileexists('C:\ProgramData\TTS\remindersenabled.in') then begin
+  if sec=timetostop then InitAlarmExpire;
+  if fileexists(datalocation + 'remindersenabled.in') then begin
   //Form 2 Notification Animation (15min)
   if sec=timetostop-900 then begin
-    nrtot:=0;
+    log('-15 min left animation launched' ,false,true);
+    Form2.Left:=screen.DesktopWidth + 200;
     Form2.ShowAN.Enabled:=true;
     Form2.Top:=35;
-    Form2.Left:=screen.Width + 200;
     Form2.Label2.Caption:='15 Minutes Left!';
     if fileexists('C:\Windows\Media\Windows Notify Messaging.wav') then
     sndPlaySound('C:\Windows\Media\Windows Notify Messaging.wav', SND_ASYNC);
   end;
   //Form 2 Notification Animation (10min)
   if sec=timetostop-600 then begin
-    nrtot:=0;
+    log('-10 min left animation launched' ,false,true);
+    Form2.Left:=screen.DesktopWidth + 200;
     Form2.ShowAN.Enabled:=true;
     Form2.Top:=35;
-    Form2.Left:=screen.Width + 200;
     Form2.Label2.Caption:='10 Minutes Left!';
     if fileexists('C:\Windows\Media\Windows Notify Messaging.wav') then
     sndPlaySound('C:\Windows\Media\Windows Notify Messaging.wav', SND_ASYNC);
   end;
   //Form 2 Notification Animation (5min)
   if sec=timetostop-300 then begin
-    nrtot:=0;
+    log('-5 min left animation launched' ,false,true);
+    Form2.Left:=screen.DesktopWidth + 200;
     Form2.ShowAN.Enabled:=true;
     Form2.Top:=35;
-    Form2.Left:=screen.Width + 200;
     Form2.Label2.Caption:='5 Minutes Left!';
     if fileexists('C:\Windows\Media\Windows Notify Messaging.wav') then
     sndPlaySound('C:\Windows\Media\Windows Notify Messaging.wav', SND_ASYNC);
   end;
   //Form 2 Notification Animation (1min)
   if sec=timetostop-60 then begin
-    nrtot:=0;
+    log('-1 min left animation launched' ,false,true);
+    Form2.Left:=screen.DesktopWidth + 200;
     Form2.ShowAN.Enabled:=true;
     Form2.Top:=35;
-    Form2.Left:=screen.Width + 200;
     Form2.Label2.Caption:='1 Minute Left!';
     if fileexists('C:\Windows\Media\Windows Notify Messaging.wav') then
     sndPlaySound('C:\Windows\Media\Windows Notify Messaging.wav', SND_ASYNC);
   end;
+  end;
+
+if logonce=false then begin
+
+if Form1.Add.Visible=true then log('Plus Button: enabled',false,false) else log('Plus Button: disabled',false,false);
+if fileexists(datalocation + 'forcequit60s.in') then log('ForceQuit90: enabled',false,false) else log('ForceQuit90: disabled',false,false);
+if fileexists(datalocation + 'remindersenabled.in') then log('Reminders: enabled',false,false) else log('Reminders: disabled',false,false);
+log('TimeToStop: ' + inttostr(TimeToStop) ,false,false);
+log('Song Choice: ' + inttostr(MusicOption) ,false,false);
+log('' ,false,false);
+log('Application Log: ' ,false,false);
+
+logonce:=true
+end;
+end;
+
+function TTTS.truncexe(filename: string; forcetrunc: boolean): string;
+begin
+  if (NOT enablefilenametrunc) and (NOT forcetrunc) then begin
+    result := filename;
+  end else begin
+    result := Copy(filename, PosLast(filename,'\') + 1, filename.Length);
   end;
 end;
 

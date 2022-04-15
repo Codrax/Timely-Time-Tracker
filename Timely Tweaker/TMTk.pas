@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, ShellAPI, Vcl.ExtCtrls, Vcl.Themes, System.UITypes,
-  Vcl.Imaging.pngimage, Vcl.WinXCtrls, IOUtils;
+  Vcl.Imaging.pngimage, Vcl.WinXCtrls, IOUtils, Vcl.Buttons, MMSystem, TimelyLib, ShlObj, ComObj, ActiveX;
 
 type
   TForm1 = class(TForm)
@@ -44,6 +44,11 @@ type
     StorUs: TLabel;
     StorageData: TLabel;
     DeleteData: TButton;
+    ComboBox1: TComboBox;
+    PlaySnd: TBitBtn;
+    OpenAnim: TTimer;
+    CloseAnim: TTimer;
+    ComboBox2: TComboBox;
     procedure Button2Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -62,9 +67,14 @@ type
     procedure FontAnimationTimer(Sender: TObject);
     procedure aroundMouseMove(Sender: TObject; Shift: TShiftState; X,
       Y: Integer);
+    procedure PlaySndClick(Sender: TObject);
+    procedure OpenAnimTimer(Sender: TObject);
+    procedure CloseAnimTimer(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
 
   private
     { Private declarations }
+    procedure StartDataSync;
   public
     { Public declarations }
   end;
@@ -74,17 +84,38 @@ var
   MaintananceNeeded: Boolean;
   add: integer = -1;
   node: integer = -1;
+  h, i: integer;
+
+  datalocation: string;
 
 implementation
 
 {$R *.dfm}
+
+procedure CreateLink(const PathObj, PathLink, Desc, Param: string);
+var
+  IObject: IUnknown;
+  SLink: IShellLink;
+  PFile: IPersistFile;
+begin
+  IObject:=CreateComObject(CLSID_ShellLink);
+  SLink:=IObject as IShellLink;
+  PFile:=IObject as IPersistFile;
+  with SLink do
+  begin
+    SetArguments(PChar(Param));
+    SetDescription(PChar(Desc));
+    SetPath(PChar(PathObj));
+  end;
+  PFile.Save(PWChar(WideString(PathLink)), FALSE);
+end;
 
 function GetTreeSize ( path: string ): integer;
 var
  tsr: TSearchRec;
 begin
  result := 0;
- path := IncludeTrailingBackSlash ( path );
+ path := IncludeTrailingPathDelimiter ( path );
  if FindFirst ( path + '*', faAnyFile, tsr ) = 0 then begin
   repeat
    if ( tsr.attr and faDirectory ) > 0 then begin
@@ -106,53 +137,119 @@ ReleaseCapture;
 SendMessage(Form1.Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0);
 end;
 
+procedure TForm1.PlaySndClick(Sender: TObject);
+begin
+case ComboBox1.ItemIndex of
+0: sndPlaySound('C:\Windows\Media\Alarm10.wav', SND_ASYNC);
+1: sndPlaySound(Pchar(datalocation + 'music\classic.wav'), SND_ASYNC);
+2: sndPlaySound(Pchar(datalocation + 'music\electric.wav'), SND_ASYNC);
+3: sndPlaySound(Pchar(datalocation + 'music\flute.wav'), SND_ASYNC);
+4: sndPlaySound(Pchar(datalocation + 'music\loudbell.wav'), SND_ASYNC);
+
+end;
+end;
+
+procedure TForm1.StartDataSync;
+begin
+//Theme Loader
+if fileexists(datalocation + 'modedark.dat') then begin
+  TStyleManager.SetStyle('Windows10 Dark');
+end else begin
+  TStyleManager.SetStyle('Windows10');
+end;
+//
+
+add:=add+1;
+node:=node+1;
+if fileexists(datalocation + 'dtwkedit.in') then begin
+Panel1.Left:=95;
+Button1.Enabled:=false;
+Button2.Enabled:=false;
+Button3.Enabled:=false;
+Button4.Enabled:=false;
+DeleteData.Enabled:=false;
+Edit1.Enabled:=false;
+CheckBox1.Enabled:=false;
+CheckBox2.Enabled:=false;
+CheckBox3.Enabled:=false;
+CheckBox4.Enabled:=false;
+CheckBox5.Enabled:=false;
+InsFont.Enabled:=false;
+UnFont.Enabled:=false;
+ComboBox1.Enabled:=false;
+ComboBox2.Enabled:=false;
+PlaySnd.Enabled:=false;
+Panel1.Show;
+end;
+try
+  checkdata();
+except end;
+
+end;
+
 procedure TForm1.Button1Click(Sender: TObject);
 var
-R: textfile;
-ResStream: TResourceStream;
+  R: textfile;
+  lk: string;
+  ResStream: TResourceStream;
 begin
+//Other Writes
+
+AssignFile(R,datalocation + 'songchoice.dat');
+rewrite(R);
+write(R,ComboBox1.ItemIndex+1);
+closefile(R);
+
+//
+
 //
 if CheckBox1.Checked=true then begin
-  if fileexists('C:\ProgramData\TTS\disablequit.in') then deletefile('C:\ProgramData\TTS\disablequit.in');
-  assignfile(R,'C:\ProgramData\TTS\disablequit.no');
+  if fileexists(datalocation + 'disablequit.in') then deletefile(datalocation + 'disablequit.in');
+  assignfile(R,datalocation + 'disablequit.no');
   rewrite(R); closefile(R);
 end else begin
-  if fileexists('C:\ProgramData\TTS\disablequit.no') then deletefile('C:\ProgramData\TTS\disablequit.no');
-  assignfile(R,'C:\ProgramData\TTS\disablequit.in');
+  if fileexists(datalocation + 'disablequit.no') then deletefile(datalocation + 'disablequit.no');
+  assignfile(R,datalocation + 'disablequit.in');
   rewrite(R); closefile(R);
 end;
 //
 if CheckBox2.Checked=true then begin
-  if fileexists('C:\ProgramData\TTS\forcequit60s.no') then deletefile('C:\ProgramData\TTS\forcequit60s.no');
-  assignfile(R,'C:\ProgramData\TTS\forcequit60s.in');
+  if fileexists(datalocation + 'forcequit60s.no') then deletefile(datalocation + 'forcequit60s.no');
+  assignfile(R,datalocation + 'forcequit60s.in');
   rewrite(R); closefile(R);
 end else begin
-  if fileexists('C:\ProgramData\TTS\forcequit60s.in') then deletefile('C:\ProgramData\TTS\forcequit60s.in');
-  assignfile(R,'C:\ProgramData\TTS\forcequit60s.no');
+  if fileexists(datalocation + 'forcequit60s.in') then deletefile(datalocation + 'forcequit60s.in');
+  assignfile(R,datalocation + 'forcequit60s.no');
   rewrite(R); closefile(R);
 end;
 //
 if CheckBox3.Checked=true then begin
-  if fileexists('C:\ProgramData\TTS\remindersenabled.no') then deletefile('C:\ProgramData\TTS\remindersenabled.no');
-  assignfile(R,'C:\ProgramData\TTS\remindersenabled.in');
+  if fileexists(datalocation + 'remindersenabled.no') then deletefile(datalocation + 'remindersenabled.no');
+  assignfile(R,datalocation + 'remindersenabled.in');
   rewrite(R); closefile(R);
 end else begin
-  if fileexists('C:\ProgramData\TTS\remindersenabled.in') then deletefile('C:\ProgramData\TTS\remindersenabled.in');
-  assignfile(R,'C:\ProgramData\TTS\remindersenabled.no');
+  if fileexists(datalocation + 'remindersenabled.in') then deletefile(datalocation + 'remindersenabled.in');
+  assignfile(R,datalocation + 'remindersenabled.no');
   rewrite(R); closefile(R);
 end;
+//
+assignfile(R,datalocation + 'idletime.dat');
+rewrite(R); writeln(R,ComboBox2.ItemIndex); closefile(R);
 //
 if CheckBox5.Checked=true then begin
-  if fileexists('C:\ProgramData\TTS\allowaddbutton.no') then deletefile('C:\ProgramData\TTS\allowaddbutton.no');
-  assignfile(R,'C:\ProgramData\TTS\allowaddbutton.in');
+  if fileexists(datalocation + 'allowaddbutton.no') then deletefile(datalocation + 'allowaddbutton.no');
+  assignfile(R,datalocation + 'allowaddbutton.in');
   rewrite(R); closefile(R);
 end else begin
-  if fileexists('C:\ProgramData\TTS\allowaddbutton.in') then deletefile('C:\ProgramData\TTS\allowaddbutton.in');
-  assignfile(R,'C:\ProgramData\TTS\allowaddbutton.no');
+  if fileexists(datalocation + 'allowaddbutton.in') then deletefile(datalocation + 'allowaddbutton.in');
+  assignfile(R,datalocation + 'allowaddbutton.no');
   rewrite(R); closefile(R);
 end;
 //
-if CheckBox4.Checked=false then begin
+lk := 'C:\Users\' + WUserName + '\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\Timely Time Tracker.lnk';
+if CheckBox4.Checked=true then begin
+CreateLink('C:\Program Files\Timely Time Tracker\TTSm.exe', lk, 'Timely Time Tracking Service', '');
+{
 if fileexists('C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\Timely Time Tracker.lnk') then begin
 ShellExecute(0, 'runas', 'cmd.exe', PChar(' /k del "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\Timely Time Tracker.lnk"'), nil, SW_SHOW);
     ShowMessage('You may now close the Command Prompt');
@@ -160,21 +257,24 @@ end;
 end
 else begin
 begin
-
+if not fileexists('C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\Timely Time Tracker.lnk') then begin
   ResStream := TResourceStream.Create(HInstance, 'Resource_1', RT_RCDATA);
   try
     ResStream.Position := 1;
-    ResStream.SaveToFile('C:\ProgramData\TTS\Timely Time Tracker.lnk');
+    ResStream.SaveToFile(datalocation + 'Timely Time Tracker.lnk');
     ShellExecute(0, 'runas', 'cmd.exe', PChar(' /k "copy "C:\ProgramData\TTS\Timely Time Tracker.lnk" "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\Timely Time Tracker.lnk""'), nil, SW_SHOW);
     ShowMessage('You may now close the Command Prompt');
   finally
     ResStream.Free;
   end;
 end;
+end;     }
 
-end;
+end else if fileexists(lk) then deletefile(lk);
+         
+
 //
-assignfile(R,'C:\ProgramData\TTS\howlongwait.dat');
+assignfile(R,datalocation + 'howlongwait.dat');
   rewrite(R);
   write(R,Edit1.Text);
   closefile(R);
@@ -182,7 +282,12 @@ end;
 
 procedure TForm1.Button2Click(Sender: TObject);
 begin
-Application.Terminate;
+  CloseAnim.Enabled := true;
+end;
+
+procedure TForm1.Button3Click(Sender: TObject);
+begin
+  StartDataSync;
 end;
 
 procedure TForm1.Button4Click(Sender: TObject);
@@ -194,41 +299,41 @@ WinExec('cmd /k "taskkill /f /im "cmd.exe""', SW_SHOW);
 ShellExecute(Handle, 'open', 'C:\Program Files\Timely Time Tracker\TTSm.exe', nil, nil, SW_SHOWNORMAL);
 ShowMessage('You may now close the Command Prompt');
 
-if not directoryexists('C:\ProgramData\TTS\') then mkdir('C:\ProgramData\TTS\');
-if not directoryexists('C:\ProgramData\TTS\dts') then mkdir('C:\ProgramData\TTS\dts');
-deletefile('C:\ProgramData\TTS\howlongwait.dat');
-deletefile('C:\ProgramData\TTS\disablequit.no');
-deletefile('C:\ProgramData\TTS\forcequit60s.no');
-deletefile('C:\ProgramData\TTS\remindersenabled.no');
-deletefile('C:\ProgramData\TTS\normalmode.in');
-deletefile('C:\ProgramData\TTS\dtwkedit.no');
+if not directoryexists(datalocation + '') then mkdir(datalocation + '');
+if not directoryexists(datalocation + 'dts') then mkdir(datalocation + 'dts');
+deletefile(datalocation + 'howlongwait.dat');
+deletefile(datalocation + 'disablequit.no');
+deletefile(datalocation + 'forcequit60s.no');
+deletefile(datalocation + 'remindersenabled.no');
+deletefile(datalocation + 'normalmode.in');
+deletefile(datalocation + 'dtwkedit.no');
 //
-deletefile('C:\ProgramData\TTS\disablequit.in');
-deletefile('C:\ProgramData\TTS\forcequit60s.in');
-deletefile('C:\ProgramData\TTS\remindersenabled.in');
-deletefile('C:\ProgramData\TTS\normalmode.no');
-deletefile('C:\ProgramData\TTS\dtwkedit.in');
+deletefile(datalocation + 'disablequit.in');
+deletefile(datalocation + 'forcequit60s.in');
+deletefile(datalocation + 'remindersenabled.in');
+deletefile(datalocation + 'normalmode.no');
+deletefile(datalocation + 'dtwkedit.in');
 
-assignfile(R,'C:\ProgramData\TTS\howlongwait.dat');
+assignfile(R,datalocation + 'howlongwait.dat');
   rewrite(R);
   write(R,'-1');
   closefile(R);
-assignfile(R,'C:\ProgramData\TTS\disablequit.no');
+assignfile(R,datalocation + 'disablequit.no');
   rewrite(R);
   closefile(R);
-  assignfile(R,'C:\ProgramData\TTS\allowaddbutton.no');
+  assignfile(R,datalocation + 'allowaddbutton.no');
   rewrite(R);
   closefile(R);
-  assignfile(R,'C:\ProgramData\TTS\forcequit60s.no');
+  assignfile(R,datalocation + 'forcequit60s.no');
   rewrite(R);
   closefile(R);
-assignfile(R,'C:\ProgramData\TTS\remindersenabled.in');
+assignfile(R,datalocation + 'remindersenabled.in');
   rewrite(R);
   closefile(R);
-assignfile(R,'C:\ProgramData\TTS\normalmode.in');
+assignfile(R,datalocation + 'normalmode.in');
   rewrite(R);
   closefile(R);
-assignfile(R,'C:\ProgramData\TTS\dtwkedit.no');
+assignfile(R,datalocation + 'dtwkedit.no');
   rewrite(R);
   closefile(R);
 
@@ -247,11 +352,11 @@ end;
 
 procedure TForm1.DeleteDataClick(Sender: TObject);
 begin
-if MessageDlg('Are you sure you want to delete ALL the computer usage files? This action is irreversibie', mtWarning, [mbYes, mbNo], 0) = mrYes then begin
+if MessageDlg('Are you sure you want to delete ALL' + #13 + 'the computer usage files? This action is irreversibie', mtWarning, [mbYes, mbNo], 0) = mrYes then begin
 
-  TDirectory.Delete('C:\ProgramData\TTS\dts', true);
-mkdir('C:\ProgramData\TTS\dts');
-StorageData.Caption:=(inttostr(GetTreeSize('C:\ProgramData\TTS\dts'))) + ' B';
+  TDirectory.Delete(datalocation + 'dts', true);
+mkdir(datalocation + 'dts');
+StorageData.Caption:=(inttostr(GetTreeSize(datalocation + 'dts'))) + ' B';
 MessageDlg('All the files were deleted.', mtInformation, [mbClose], 0);
 
   end;
@@ -262,7 +367,7 @@ var
 J: textfile;
 begin
 if add=5 then begin
-  assignfile(J,'C:\ProgramData\TTS\enabledebug.in');
+  assignfile(J,datalocation + 'enabledebug.in');
   rewrite(J);
   closefile(J);
   label2.Caption:='- Timely Options. -';
@@ -271,13 +376,12 @@ else add:=0;
 
 
 if node=15 then begin
-  if MessageDlg('Are you sure you want to disable "Timely Tweaker"? This action can only be reverted by modifying the disable data file of Timely Time Tracker.', mtConfirmation, [mbYes, mbNo], 0) = mrYes then begin
-  deletefile('C:\ProgramData\TTS\dtwkedit.no');
-  assignfile(J,'C:\ProgramData\TTS\dtwkedit.in');
+  if MessageDlg('Are you sure you want to disable "Timely Tweaker"?' + #13 + 'This action can only be reverted by modifying the disable ' + #13 + 'data file of Timely Time Tracker.', mtConfirmation, [mbYes, mbNo], 0) = mrYes then begin
+  deletefile(datalocation + 'dtwkedit.no');
+  assignfile(J,datalocation + 'dtwkedit.in');
   rewrite(J);
   closefile(J);
   label2.Caption:='- (Close to disable) -';
-
   end;
 end
 else node:=0;
@@ -293,31 +397,31 @@ fontico.Top:=40;
 
 
 //EXTRACT FONTS
-if not directoryexists('C:\ProgramData\TTS\') then mkdir('C:\ProgramData\TTS\');
-if not directoryexists('C:\ProgramData\TTS\fonts\') then mkdir('C:\ProgramData\TTS\fonts\');
+if not directoryexists(datalocation + '') then mkdir(datalocation + '');
+if not directoryexists(datalocation + 'fonts\') then mkdir(datalocation + 'fonts\');
   //
-  if not fileexists('C:\ProgramData\TTS\fonts\Nexa Bold.otf') then begin
+  if not fileexists(datalocation + 'fonts\Nexa Bold.otf') then begin
   ResStream := TResourceStream.Create(HInstance, 'Resource_2', RT_RCDATA);
   try
     ResStream.Position := 1;
-    ResStream.SaveToFile('C:\ProgramData\TTS\fonts\Nexa Bold.otf');
+    ResStream.SaveToFile(datalocation + 'fonts\Nexa Bold.otf');
   finally
     ResStream.Free;
   end; end;
 
   //
-  if not fileexists('C:\ProgramData\TTS\fonts\Nexa Light.otf') then begin
+  if not fileexists(datalocation + 'fonts\Nexa Light.otf') then begin
     ResStream := TResourceStream.Create(HInstance, 'Resource_3', RT_RCDATA);
   try
     ResStream.Position := 1;
-    ResStream.SaveToFile('C:\ProgramData\TTS\fonts\Nexa Light.otf');
+    ResStream.SaveToFile(datalocation + 'fonts\Nexa Light.otf');
   finally
     ResStream.Free;
   end; end;
 
 
-  AddFontResource('C:\ProgramData\TTS\fonts\Nexa Bold.otf');
-  AddFontResource('C:\ProgramData\TTS\fonts\Nexa Light.otf');
+  AddFontResource(Pchar(datalocation + 'fonts\Nexa Bold.otf') );
+  AddFontResource(Pchar(datalocation + 'fonts\Nexa Light.otf') );
   SendMessage(HWND_BROADCAST,WM_FONTCHANGE,0,0);
 end;
 
@@ -332,10 +436,16 @@ begin
 Application.Minimize;
 end;
 
+procedure TForm1.OpenAnimTimer(Sender: TObject);
+begin
+  Self.Left := Self.Left - screen.Width div 20;
+  if Self.Left <= Screen.Width div 2 - Self.Width div 2 then OpenAnim.Enabled := false;
+end;
+
 procedure TForm1.TrackDataChangesTimer(Sender: TObject);
 begin
 //Theme Loader
-if fileexists('C:\ProgramData\TTS\modedark.dat') then begin
+if fileexists(datalocation + 'modedark.dat') then begin
   TStyleManager.SetStyle('Windows10 Dark');
 end else begin
   TStyleManager.SetStyle('Windows10');
@@ -348,8 +458,8 @@ begin
 fontico.Show;
 fontico.Top:=80;
 
-RemoveFontResource('C:\ProgramData\TTS\fonts\Nexa Light.otf');
-RemoveFontResource('C:\ProgramData\TTS\fonts\Nexa Bold.otf');
+RemoveFontResource(Pchar(datalocation + 'fonts\Nexa Light.otf') );
+RemoveFontResource(Pchar(datalocation + 'fonts\Nexa Bold.otf') );
 SendMessage(HWND_BROADCAST,WM_FONTCHANGE,0,0);
 end;
 
@@ -359,30 +469,44 @@ A: textfile;
 temp: string;
 begin
 //READ VALUES
-assignfile(A,'C:\ProgramData\TTS\howlongwait.dat');
+assignfile(A,datalocation + 'howlongwait.dat');
 reset(A);
 read(A,temp);
 Edit1.Text:=temp;
 closefile(A);
 
-if fileexists('C:\ProgramData\TTS\allowaddbutton.no') then CheckBox5.Checked:=false else CheckBox5.Checked:=true;
-if fileexists('C:\ProgramData\TTS\disablequit.no') then CheckBox1.Checked:=true else CheckBox1.Checked:=false;
-if fileexists('C:\ProgramData\TTS\forcequit60s.no') then CheckBox2.Checked:=false else CheckBox2.Checked:=true;
-if fileexists('C:\ProgramData\TTS\remindersenabled.no') then CheckBox3.Checked:=false else CheckBox3.Checked:=true;
-if fileexists('C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\Timely Time Tracker.lnk') then CheckBox4.Checked:=true else CheckBox4.Checked:=false;
+assignfile(A,datalocation + 'idletime.dat');
+reset(A);
+read(A,temp);
+ComboBox2.ItemIndex:=strtoint(temp);
+closefile(A);
+
+assignfile(A,datalocation + 'songchoice.dat');
+reset(A);
+read(A,temp);
+h:=strtoint(temp);
+ComboBox1.ItemIndex:=h-1;
+closefile(A);
+
+
+if fileexists(datalocation + 'allowaddbutton.no') then CheckBox5.Checked:=false else CheckBox5.Checked:=true;
+if fileexists(datalocation + 'disablequit.no') then CheckBox1.Checked:=true else CheckBox1.Checked:=false;
+if fileexists(datalocation + 'forcequit60s.no') then CheckBox2.Checked:=false else CheckBox2.Checked:=true;
+if fileexists(datalocation + 'remindersenabled.no') then CheckBox3.Checked:=false else CheckBox3.Checked:=true;
+if fileexists('C:\Users\' + WUserName + '\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\Timely Time Tracker.lnk') then CheckBox4.Checked:=true else CheckBox4.Checked:=false;
 
 
 
 
 //MAINTANANCE CHECK
-if (not fileexists('C:\ProgramData\TTS\disablequit.no') and not fileexists('C:\ProgramData\TTS\disablequit.in'))
-or (not fileexists('C:\ProgramData\TTS\forcequit60s.no') and not fileexists('C:\ProgramData\TTS\forcequit60s.in'))
-or (not fileexists('C:\ProgramData\TTS\allowaddbutton.no') and not fileexists('C:\ProgramData\TTS\allowaddbutton.in'))
-or (not fileexists('C:\ProgramData\TTS\normalmode.no') and not fileexists('C:\ProgramData\TTS\normalmode.in'))
-or (not fileexists('C:\ProgramData\TTS\remindersenabled.no') and not fileexists('C:\ProgramData\TTS\remindersenabled.in'))
-or (not fileexists('C:\ProgramData\TTS\dtwkedit.no') and not fileexists('C:\ProgramData\TTS\dtwkedit.in'))
-or (not fileexists('C:\ProgramData\TTS\howlongwait.dat') and not fileexists('C:\ProgramData\TTS\howlongwait.dat'))
-or (not directoryexists('C:\ProgramData\TTS')) or (not directoryexists('C:\ProgramData\TTS\dts'))
+if (not fileexists(datalocation + 'disablequit.no') and not fileexists(datalocation + 'disablequit.in'))
+or (not fileexists(datalocation + 'forcequit60s.no') and not fileexists(datalocation + 'forcequit60s.in'))
+or (not fileexists(datalocation + 'allowaddbutton.no') and not fileexists(datalocation + 'allowaddbutton.in'))
+or (not fileexists(datalocation + 'normalmode.no') and not fileexists(datalocation + 'normalmode.in'))
+or (not fileexists(datalocation + 'remindersenabled.no') and not fileexists(datalocation + 'remindersenabled.in'))
+or (not fileexists(datalocation + 'dtwkedit.no') and not fileexists(datalocation + 'dtwkedit.in'))
+or (not fileexists(datalocation + 'howlongwait.dat') and not fileexists(datalocation + 'howlongwait.dat'))
+or (not directoryexists(datalocation)) or (not directoryexists(datalocation + 'dts'))
 then begin
 MaintananceNeeded:=true;
 Label4.Color:=clRed;
@@ -397,9 +521,20 @@ Button4.Enabled:=false;
 end;
 end;
 
+procedure TForm1.CloseAnimTimer(Sender: TObject);
+begin
+  if i > 12 then
+    Self.Left := Self.Left + 100
+  else begin
+    Self.Left := Self.Left - (Screen.Width div 50 - 2 * i);
+    i := i + 1;
+  end;
+  if Self.Left >= Screen.DesktopWidth then begin CloseAnim.Enabled:=false; Application.Terminate end;
+end;
+
 procedure TForm1.closeappClick(Sender: TObject);
 begin
-Application.Terminate;
+CloseAnim.Enabled := true;
 end;
 
 procedure TForm1.FontAnimationTimer(Sender: TObject);
@@ -412,40 +547,14 @@ insfont.Show;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
-var
-test: String;
 begin
-StorageData.Caption:=(inttostr(GetTreeSize('C:\ProgramData\TTS\dts'))) + ' B';
+  Self.Top := Screen.Height div 2 - Self.Height div 2;
+  Self.Left := Screen.Width;
+  datalocation := 'C:\Users\' + WUSername + '\AppData\Local\TTS\';
 
-//Theme Loader
-if fileexists('C:\ProgramData\TTS\modedark.dat') then begin
-  TStyleManager.SetStyle('Windows10 Dark');
-end else begin
-  TStyleManager.SetStyle('Windows10');
-end;
-//
+StorageData.Caption:=(inttostr(GetTreeSize(datalocation + 'dts'))) + ' B';
 
-add:=add+1;
-node:=node+1;
-if fileexists('C:\ProgramData\TTS\dtwkedit.in') then begin
-Panel1.Left:=95;
-Button1.Enabled:=false;
-Button2.Enabled:=false;
-Button3.Enabled:=false;
-Button4.Enabled:=false;
-DeleteData.Enabled:=false;
-Edit1.Enabled:=false;
-CheckBox1.Enabled:=false;
-CheckBox2.Enabled:=false;
-CheckBox3.Enabled:=false;
-CheckBox4.Enabled:=false;
-CheckBox5.Enabled:=false;
-InsFont.Enabled:=false;
-UnFont.Enabled:=false;
-Panel1.Show;
-end;
-checkdata();
-
+StartDataSync;
 
 end;
 

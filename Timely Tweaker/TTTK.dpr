@@ -5,6 +5,7 @@ program TTTK;
 uses
   Vcl.Forms,
   TMTk in 'TMTk.pas' {Form1},
+  TimelyLib in '..\Shared\TimelyLib.pas',
   Vcl.Themes,
   Vcl.Styles;
 

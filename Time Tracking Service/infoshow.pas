@@ -14,13 +14,16 @@ type
     Label2: TLabel;
     Label3: TLabel;
     ShowAN: TTimer;
-    Timer1: TTimer;
+    Closein10: TTimer;
     crn1: TImage;
     crn2: TImage;
+    border: TImage;
+    HideAN: TTimer;
     procedure ShowANTimer(Sender: TObject);
-    procedure Label1Click(Sender: TObject);
+    procedure CloseUI(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure Timer1Timer(Sender: TObject);
+    procedure Closein10Timer(Sender: TObject);
+    procedure HideANTimer(Sender: TObject);
   private
     { Private declarations }
   public
@@ -29,8 +32,7 @@ type
 
 var
   Form2: TForm2;
-  times: Integer;
-  nrtot: Integer;
+  i: integer;
 
 implementation
 
@@ -38,33 +40,40 @@ implementation
 
 procedure TForm2.FormCreate(Sender: TObject);
 begin
-Form2.Top:=50;
-Form2.Left:=screen.Width + 200;
+  Form2.Top:=50;
+  Form2.Left:=screen.Width + 200;
 end;
 
-procedure TForm2.Label1Click(Sender: TObject);
+procedure TForm2.HideANTimer(Sender: TObject);
 begin
-Form2.hide;
+  if i > 12 then
+    Self.Left := Self.Left + 60
+  else begin
+    Self.Left := Self.Left - (20 - 2 * i);
+    i := i + 1;
+  end;
+  if Self.Left >= Screen.DesktopWidth then begin HideAN.Enabled:=false; end;
+end;
+
+procedure TForm2.CloseUI(Sender: TObject);
+begin
+  i := 0;
+  HideAN.Enabled := true;
 end;
 
 procedure TForm2.ShowANTimer(Sender: TObject);
 begin
-Form2.Show;
-Form2.Left:=Form2.Left-25;
-nrtot:=nrtot+1;
-if nrtot>24 then begin ShowAN.Enabled:=false; Timer1.Enabled:=true; end;
+  CloseIn10.Enabled := false;
+  HideAn.Enabled := false;
+  Self.Show;
+  Self.Left:=Form2.Left-40;
+  if Self.Left <= Screen.DesktopWidth - Self.Width - 20 then begin ShowAN.Enabled:=false; CloseIn10.Enabled := true; end;
 end;
 
-procedure TForm2.Timer1Timer(Sender: TObject);
+procedure TForm2.Closein10Timer(Sender: TObject);
 begin
-times:=times+1;
-
-if times=15 then begin
-Form2.Hide;
-Timer1.Enabled:=false;
-times:=0;
-end;
-
+  CloseUI(nil);
+  CloseIn10.Enabled:=false;
 end;
 
 end.

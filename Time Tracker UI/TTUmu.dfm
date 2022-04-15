@@ -3589,7 +3589,7 @@ object Timely: TTimely
     00F00F0000E0070000C003000080010000800100008001000080010000800100
     008001000080000000C0010000E0070000F00F0000FC3F0000FFFF0000}
   OldCreateOrder = False
-  Position = poScreenCenter
+  Position = poDesigned
   Visible = True
   OnCreate = FormCreate
   OnMouseLeave = FormMouseLeave
@@ -3611,10 +3611,11 @@ object Timely: TTimely
     OnMouseLeave = bkgMouseLeave
   end
   object border: TImage
-    Left = -1
-    Top = -1
+    Left = 0
+    Top = 0
     Width = 660
     Height = 363
+    Align = alClient
     Picture.Data = {
       0954506E67496D61676589504E470D0A1A0A0000000D49484452000002260000
       01A20806000000D3070D150000000467414D410000B18F0BFC61050000000970
@@ -3737,10 +3738,12 @@ object Timely: TTimely
     Stretch = True
     OnMouseLeave = borderMouseLeave
     OnMouseMove = borderMouseMove
+    ExplicitLeft = -24
+    ExplicitTop = -8
   end
   object shelf: TImage
-    Left = 80
-    Top = 281
+    Left = 72
+    Top = 265
     Width = 497
     Height = 98
     Picture.Data = {
@@ -5707,10 +5710,12 @@ object Timely: TTimely
     Stretch = True
   end
   object title: TLabel
-    Left = 128
+    Left = 80
     Top = 32
-    Width = 398
+    Width = 511
     Height = 33
+    Alignment = taCenter
+    AutoSize = False
     Caption = 'Today you used your computer'
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
@@ -5733,11 +5738,11 @@ object Timely: TTimely
     ParentFont = False
   end
   object credit: TLabel
-    Left = 533
+    Left = 477
     Top = 341
-    Width = 89
+    Width = 150
     Height = 14
-    Caption = 'Made by Corelax'
+    Caption = 'Made by Petculescu Codrut'
   end
   object hrs: TLabel
     Left = 254
@@ -5818,8 +5823,8 @@ object Timely: TTimely
     WordWrap = True
   end
   object lt5days: TLabel
-    Left = 235
-    Top = 160
+    Left = 240
+    Top = 152
     Width = 188
     Height = 36
     Caption = 'Last five days'
@@ -5831,25 +5836,34 @@ object Timely: TTimely
     ParentFont = False
   end
   object day5: TLabel
-    Left = 196
-    Top = 230
+    Left = 188
+    Top = 215
     Width = 27
     Height = 0
+    Alignment = taCenter
     AutoSize = False
     Color = 8388863
+    Constraints.MaxHeight = 100
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Tahoma'
+    Font.Style = []
     ParentColor = False
+    ParentFont = False
     ParentShowHint = False
     ShowHint = True
     Transparent = False
     OnMouseEnter = day5MouseEnter
   end
   object day4: TLabel
-    Left = 256
-    Top = 230
+    Left = 248
+    Top = 215
     Width = 27
     Height = 0
     AutoSize = False
     Color = 8388863
+    Constraints.MaxHeight = 100
     ParentColor = False
     ParentShowHint = False
     ShowHint = True
@@ -5857,12 +5871,13 @@ object Timely: TTimely
     OnMouseEnter = day4MouseEnter
   end
   object day3: TLabel
-    Left = 316
-    Top = 230
+    Left = 308
+    Top = 215
     Width = 28
     Height = 0
     AutoSize = False
     Color = 8388863
+    Constraints.MaxHeight = 100
     ParentColor = False
     ParentShowHint = False
     ShowHint = True
@@ -5870,12 +5885,13 @@ object Timely: TTimely
     OnMouseEnter = day3MouseEnter
   end
   object day2: TLabel
-    Left = 376
-    Top = 230
+    Left = 368
+    Top = 215
     Width = 27
     Height = 0
     AutoSize = False
     Color = 8388863
+    Constraints.MaxHeight = 100
     ParentColor = False
     ParentShowHint = False
     ShowHint = True
@@ -5883,12 +5899,13 @@ object Timely: TTimely
     OnMouseEnter = day2MouseEnter
   end
   object day1: TLabel
-    Left = 436
-    Top = 230
+    Left = 428
+    Top = 215
     Width = 27
     Height = 0
     AutoSize = False
     Color = 8388863
+    Constraints.MaxHeight = 100
     ParentColor = False
     ParentShowHint = False
     ShowHint = True
@@ -5896,8 +5913,8 @@ object Timely: TTimely
     OnMouseEnter = day1MouseEnter
   end
   object h24: TLabel
-    Left = 516
-    Top = 209
+    Left = 508
+    Top = 193
     Width = 21
     Height = 11
     Caption = '- 24h'
@@ -5909,8 +5926,8 @@ object Timely: TTimely
     ParentFont = False
   end
   object h12: TLabel
-    Left = 516
-    Top = 254
+    Left = 508
+    Top = 238
     Width = 21
     Height = 11
     Caption = '- 12h'
@@ -5922,8 +5939,8 @@ object Timely: TTimely
     ParentFont = False
   end
   object h1: TLabel
-    Left = 516
-    Top = 304
+    Left = 508
+    Top = 288
     Width = 16
     Height = 11
     Caption = '- 1h'
@@ -5935,8 +5952,8 @@ object Timely: TTimely
     ParentFont = False
   end
   object a1: TLabel
-    Left = 440
-    Top = 328
+    Left = 432
+    Top = 312
     Width = 31
     Height = 10
     Caption = '1day ago'
@@ -5948,8 +5965,8 @@ object Timely: TTimely
     ParentFont = False
   end
   object a2: TLabel
-    Left = 372
-    Top = 328
+    Left = 364
+    Top = 312
     Width = 35
     Height = 10
     Caption = '2days ago'
@@ -5961,8 +5978,8 @@ object Timely: TTimely
     ParentFont = False
   end
   object a3: TLabel
-    Left = 314
-    Top = 328
+    Left = 306
+    Top = 312
     Width = 35
     Height = 10
     Caption = '3days ago'
@@ -5974,8 +5991,8 @@ object Timely: TTimely
     ParentFont = False
   end
   object a4: TLabel
-    Left = 254
-    Top = 328
+    Left = 246
+    Top = 312
     Width = 35
     Height = 10
     Caption = '4days ago'
@@ -5987,8 +6004,8 @@ object Timely: TTimely
     ParentFont = False
   end
   object a5: TLabel
-    Left = 196
-    Top = 328
+    Left = 188
+    Top = 312
     Width = 35
     Height = 10
     Caption = '5days ago'
@@ -6004,7 +6021,7 @@ object Timely: TTimely
     Top = 341
     Width = 24
     Height = 14
-    Caption = 'v2.0'
+    Caption = 'v3.0'
   end
   object geardark: TImage
     Left = 597
@@ -7384,6 +7401,35 @@ object Timely: TTimely
     ParentFont = False
     OnClick = minimiseClick
   end
+  object AppUsageOpen: TLabel
+    Left = 264
+    Top = 341
+    Width = 110
+    Height = 14
+    Cursor = crHandPoint
+    Caption = #10147' Application Usage'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    OnClick = AppUsageOpenClick
+  end
+  object Idle: TLabel
+    Left = 318
+    Top = 190
+    Width = 27
+    Height = 19
+    Caption = 'Idle'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    Visible = False
+  end
   object Calendar1: TCalendar
     Left = 675
     Top = 32
@@ -7394,8 +7440,8 @@ object Timely: TTimely
     Visible = False
   end
   object loadicon: TActivityIndicator
-    Left = 172
-    Top = 86
+    Left = 177
+    Top = 87
     Animate = True
     IndicatorColor = aicWhite
     IndicatorType = aitRotatingSector
@@ -7409,8 +7455,8 @@ object Timely: TTimely
     TabOrder = 2
     UseCurrentDate = False
   end
-  object Timer1: TTimer
-    OnTimer = Timer1Timer
+  object secpass: TTimer
+    OnTimer = secpassTimer
     Left = 56
     Top = 32
   end
@@ -7418,12 +7464,25 @@ object Timely: TTimely
     Interval = 1
     OnTimer = OpenLast5Timer
     Left = 56
-    Top = 32
+    Top = 80
   end
   object delay3s: TTimer
     Interval = 3000
     OnTimer = delay3sTimer
     Left = 56
-    Top = 32
+    Top = 128
+  end
+  object OpenAnim: TTimer
+    Interval = 1
+    OnTimer = OpenAnimTimer
+    Left = 56
+    Top = 184
+  end
+  object CloseAnim: TTimer
+    Enabled = False
+    Interval = 1
+    OnTimer = CloseAnimTimer
+    Left = 56
+    Top = 240
   end
 end

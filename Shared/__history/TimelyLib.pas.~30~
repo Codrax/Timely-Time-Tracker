@@ -1,0 +1,71 @@
+unit TimelyLib;
+
+interface
+
+  uses Windows, Types, IOUtils, SysUtils, ShellApi, Vcl.Forms, Vcl.Graphics;
+
+  function WUserName: String;
+  function GetCurrentAppName: string;
+  Function GetFileName : ansistring;
+  function GetAppIcon(path: string): TBitMap;
+
+implementation
+
+const
+  Max_Path = 260;
+
+function GetAppIcon(path: string): TBitMap;
+  var
+  IconIndex: word;
+  Buffer: array[0..2048] of char;
+  IconHandle: HIcon;
+  Bitmap : TBitmap;
+begin
+  StrCopy(@Buffer, PChar(path));
+  IconIndex := 0;
+  IconHandle := ExtractAssociatedIcon(HInstance, Buffer, IconIndex);
+  if IconHandle <> 0 then
+    {Icon.Handle := IconHandle;
+  Bitmap := TBitmap.Create;
+  try
+    Bitmap.Width := Icon.Width;
+    Bitmap.Height := Icon.Height;
+    Bitmap.Canvas.Draw(0, 0, Icon);
+    Result := Bitmap;
+  finally
+    Bitmap.Free;
+  end;    }
+end;
+
+function WUserName: String;
+var
+  nSize: DWord;
+begin
+ nSize := 1024;
+ SetLength(Result, nSize);
+ if GetUserName(PChar(Result), nSize) then
+   SetLength(Result, nSize-1)
+ else
+   RaiseLastOSError;
+end;
+
+function GetCurrentAppName: string;
+var
+h: hWnd;
+begin
+  h := GetForegroundWindow;
+  SetLength(Result, GetWindowTextLength(h) + 1);
+  GetWindowText(h, PChar(Result), GetWindowTextLength(h) + 1);
+end;
+
+Function GetFileName : ansistring;
+var
+  S : array[0..max_path] of char; // somplace to put the answer
+  H : longword; // the window to be trapped
+begin
+  H := getforegroundwindow;
+  Getwindowmodulefilename(h,s,max_path);
+  result := S;
+end;
+
+end.

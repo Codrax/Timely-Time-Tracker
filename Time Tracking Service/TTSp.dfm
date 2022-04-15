@@ -14,6 +14,7 @@ object TTS: TTTS
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
@@ -27,8 +28,8 @@ object TTS: TTTS
   end
   object TR: TTimer
     OnTimer = TRTimer
-    Left = 8
-    Top = 32
+    Left = 16
+    Top = 16
   end
   object TrayIcon1: TTrayIcon
     Hint = 'Tracking your computer usage'
@@ -3528,13 +3529,14 @@ object TTS: TTTS
       000000000000000000000000000000008001000080010000C0030000F00F0000}
     PopupMenu = PopupMenu1
     Visible = True
-    Left = 64
-    Top = 96
+    OnDblClick = UIOClick
+    Left = 304
+    Top = 152
   end
   object PopupMenu1: TPopupMenu
     MenuAnimation = [maTopToBottom]
-    Left = 48
-    Top = 24
+    Left = 264
+    Top = 152
     object UIO: TMenuItem
       Caption = 'Open UI'
       OnClick = UIOClick
@@ -3546,15 +3548,20 @@ object TTS: TTTS
     object N1: TMenuItem
       Caption = '-'
     end
-    object Exit: TMenuItem
+    object Exit1: TMenuItem
       Caption = 'Exit'
-      OnClick = ExitClick
+      OnClick = Exit1Click
     end
   end
   object StartCheck500ms: TTimer
     Interval = 1100
     OnTimer = StartCheck500msTimer
-    Left = 24
-    Top = 88
+    Left = 16
+    Top = 144
+  end
+  object AppsUsageSync: TTimer
+    OnTimer = AppsUsageSyncTimer
+    Left = 16
+    Top = 72
   end
 end

@@ -7,8 +7,10 @@ program TTU;
 uses
   Vcl.Forms,
   TTUmu in 'TTUmu.pas' {Timely},
+  TimelyLib in '..\Shared\TimelyLib.pas',
   Vcl.Themes,
-  Vcl.Styles;
+  Vcl.Styles,
+  ApplicationUsageStats in 'ApplicationUsageStats.pas' {AppUsage};
 
 {$R *.res}
 
@@ -17,5 +19,6 @@ begin
   Application.MainFormOnTaskbar := True;
   TStyleManager.TrySetStyle('Windows10');
   Application.CreateForm(TTimely, Timely);
+  Application.CreateForm(TAppUsage, AppUsage);
   Application.Run;
 end.

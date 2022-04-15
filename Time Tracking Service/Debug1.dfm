@@ -40,10 +40,40 @@ object Form3: TForm3
     Height = 13
     Caption = 'Int:TimeToStop = '
   end
+  object Label4: TLabel
+    Left = 288
+    Top = 43
+    Width = 90
+    Height = 13
+    Caption = 'Int:MusicOption = '
+  end
+  object Label5: TLabel
+    Left = 288
+    Top = 62
+    Width = 114
+    Height = 13
+    Caption = 'Str:Current open app ='
+    OnClick = Label5Click
+  end
+  object Label6: TLabel
+    Left = 288
+    Top = 81
+    Width = 109
+    Height = 13
+    Caption = 'Str:Current Caption = '
+    OnClick = Label5Click
+  end
+  object Label7: TLabel
+    Left = 288
+    Top = 100
+    Width = 25
+    Height = 13
+    Caption = 'Idle: '
+  end
   object Button1: TButton
-    Left = 111
+    Left = 120
     Top = 200
-    Width = 53
+    Width = 44
     Height = 25
     Caption = 'Ok'
     TabOrder = 0
@@ -52,7 +82,7 @@ object Form3: TForm3
   object Edit1: TEdit
     Left = 8
     Top = 202
-    Width = 97
+    Width = 106
     Height = 21
     TabOrder = 1
     TextHint = 'Enter a int value'
@@ -139,7 +169,79 @@ object Form3: TForm3
     TabOrder = 10
     OnClick = Button10Click
   end
+  object Button11: TButton
+    Left = 420
+    Top = 157
+    Width = 99
+    Height = 25
+    Caption = 'Delete Log'
+    TabOrder = 11
+    OnClick = Button11Click
+  end
+  object CheckBox1: TCheckBox
+    Left = 328
+    Top = 134
+    Width = 97
+    Height = 17
+    Caption = 'Enable Logging'
+    TabOrder = 12
+    OnClick = CheckBox1Click
+  end
+  object Button12: TButton
+    Left = 328
+    Top = 157
+    Width = 75
+    Height = 25
+    Caption = 'Open Log'
+    TabOrder = 13
+    OnClick = Button12Click
+  end
+  object Button13: TButton
+    Left = 136
+    Top = 55
+    Width = 75
+    Height = 25
+    Caption = 'Light Theme'
+    TabOrder = 14
+    OnClick = Button13Click
+  end
+  object Button14: TButton
+    Left = 136
+    Top = 128
+    Width = 75
+    Height = 25
+    Caption = 'Dark Theme'
+    TabOrder = 15
+    OnClick = Button14Click
+  end
+  object CheckBox2: TCheckBox
+    Left = 422
+    Top = 134
+    Width = 97
+    Height = 17
+    Caption = 'Enable 90 timer'
+    TabOrder = 16
+  end
+  object Button16: TButton
+    Left = 170
+    Top = 200
+    Width = 41
+    Height = 25
+    Caption = 'Ok 90'
+    TabOrder = 17
+    OnClick = Button16Click
+  end
+  object Button17: TButton
+    Left = 170
+    Top = 176
+    Width = 41
+    Height = 25
+    Caption = 'Ok TTS'
+    TabOrder = 18
+    OnClick = Button16Click
+  end
   object Timer1: TTimer
+    Enabled = False
     Interval = 1
     OnTimer = Timer1Timer
     Left = 16

@@ -109,6 +109,8 @@
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Icon_MainIcon>TTU_Icon.ico</Icon_MainIcon>
+        <VerInfo_MajorVer>3</VerInfo_MajorVer>
+        <VerInfo_Keys>CompanyName=;FileDescription=The main UI of Timely Time Tracker;FileVersion=3.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.codrut.TTUI;ProductName=Timely Time Tracker UI;ProductVersion=2.0.1;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
@@ -130,6 +132,11 @@
         </DelphiCompile>
         <DCCReference Include="TTUmu.pas">
             <Form>Timely</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="..\Shared\TimelyLib.pas"/>
+        <DCCReference Include="ApplicationUsageStats.pas">
+            <Form>AppUsage</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <RcItem Include="C:\Users\Codrut\OneDrive\Documents\Nexa Bold.otf">
