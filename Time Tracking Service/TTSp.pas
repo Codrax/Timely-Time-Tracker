@@ -36,6 +36,7 @@ type
     function SmartCaptionParse(caption, exe: string): string;
     function IdleTime: DWord;
     function QuickRead(filename: string): string;
+    procedure QuickWrite(filename: string; data: string);
   protected
     procedure CreateParams(var Params: TCreateParams); override;
   public
@@ -51,7 +52,7 @@ var
   themenow,
   datalocation,
   filename: string;
-  timetostop: Integer;
+  timetostop: Integer = -1;
   NewDate,
   OldDate,
   lastsecond,
@@ -167,33 +168,55 @@ begin
 end;
 
 procedure TTTS.CheckForTimerExpire;
+var
+  acolor: TColor;
 begin
-  Form1.SoundAlarm.Enabled := false;
+  with Form1 do begin
+  SoundAlarm.Enabled := false;
   if fileexists(datalocation + 'forcequit60s.in') or (Form3.CheckBox2.Checked) then begin
-       Form1.AutoStop.Enabled:=true;
-       Form1.DMtx.Hide;
-       Form1.DMbg.Hide;
-       Form1.tmr.Caption := '90';
+       AutoStop.Enabled:=true;
+       dm.Hide;
+       tmr.Text := '90';
        TimeTillStop := 89;
-       Form1.SDtx.Width:=350;
-       Form1.SDbg.Width:=350;
-       Form1.tmr.Show;
+       sd.Width:=365;
+       Add.Pen.Color := sd.Colors.Leave;
+       Add.Pen.AltHoverColor := sd.Colors.Enter;
+       Add.Pen.AltPressColor := sd.Colors.Down;
+       tmr.Show;
     end else begin
-      Form1.AutoStop.Enabled:=false;
-       Form1.DMtx.Show;
-       Form1.DMbg.Show;
-       Form1.SDtx.Width:=180;
-       Form1.SDbg.Width:=180;
-       Form1.tmr.Hide;
+      AutoStop.Enabled:=false;
+       dm.Show;
+       sd.Width:=180;
+       Add.Pen.Color := dm.Colors.Leave;
+       Add.Pen.AltHoverColor := dm.Colors.Enter;
+       Add.Pen.AltPressColor := dm.Colors.Down;
+       tmr.Hide;
     end;
-    Form1.SoundAlarm.Enabled := true;
+    if TStyleManager.ActiveStyle.Name = 'Windows10' then acolor := clBlack else acolor := clWhite;
+
+      add.TextColors.Enter := acolor;
+      tmr.TextColors.Enter := acolor;
+      dm.TextColors.Enter := acolor;
+      sd.TextColors.Enter := acolor;
+      add.TextColors.Down := acolor;
+      tmr.TextColors.Down := acolor;
+      dm.TextColors.Down := acolor;
+      sd.TextColors.Down := acolor;
+      add.TextColors.Leave := acolor;
+      tmr.TextColors.Leave := acolor;
+      dm.TextColors.Leave := acolor;
+      sd.TextColors.Leave := acolor;
+
+    add.Invalidate;
+    SoundAlarm.Enabled := true;
+  end;
 end;
 
 procedure TTTS.CreateParams(var Params: TCreateParams);
 var
+  st2: TStringList;
   A: textfile;
   i: integer;
-  st, st2: TStringList;
 begin
   inherited;
   datalocation := 'C:\Users\' + WUSername + '\AppData\Local\TTS\';
@@ -213,15 +236,12 @@ begin
       //Check for existing data
   if fileexists(datalocation + 'dts\' + filename + '.dat') then
   begin
-    st := TStringList.Create;
+
     try
-    st.LoadFromFile(datalocation + 'dts\' + filename + '.dat');
-      //Load File
-      try
-        i := strtoint(st[0]);
-        if i > 0 then sec := i;
-      except
-        log('(!) EXCEPTION OCCURED WHEN CONVERTING SEC. Temp Value:' + temp ,true,true);
+      i := strtoint(QuickRead(datalocation + 'dts\' + filename + '.dat'));
+      if i > 0 then sec := i;
+    except
+      log('(!) EXCEPTION OCCURED WHEN CONVERTING SEC. Temp Value:' + temp ,true,true);
 
         st2 := TStringList.Create;
         try
@@ -231,13 +251,6 @@ begin
         finally
           st2.Free;
         end;
-
-      sec:=0;
-      end;
-
-    finally
-      st.Free;
-    //log('(!) EXCEPTION OCCURED WHEN READING SEC. Temp Value:' + temp ,true,true);
     end;
   end;
      //Open for writing
@@ -245,55 +258,14 @@ begin
 
      //create other files
      try
-  if NOT (fileexists(datalocation + 'allowaddbutton.no')) and NOT (fileexists(datalocation + 'allowaddbutton.in')) then begin
-    assignfile(A,datalocation + 'allowaddbutton.no');
-    rewrite(A);
-    closefile(A);
-  end;
-  if NOT fileexists(datalocation + 'howlongwait.dat') then begin
-    assignfile(A,datalocation + 'howlongwait.dat');
-    rewrite(A);
-    write(A,'-1');
-    closefile(A);
-  end;
-  if NOT (fileexists(datalocation + 'disablequit.no')) and NOT (fileexists(datalocation + 'disablequit.in')) then begin
-    assignfile(A,datalocation + 'disablequit.no');
-    rewrite(A);
-    closefile(A);
-  end;
-  if NOT (fileexists(datalocation + 'forcequit60s.no')) and NOT (fileexists(datalocation + 'forcequit60s.in')) then begin
-    assignfile(A,datalocation + 'forcequit60s.no');
-    rewrite(A);
-    closefile(A);
-  end;
-  if NOT (fileexists(datalocation + 'remindersenabled.no')) and NOT (fileexists(datalocation + 'remindersenabled.in')) then begin
-    assignfile(A,datalocation + 'remindersenabled.in');
-    rewrite(A);
-    closefile(A);
-  end;
-  if NOT fileexists(datalocation + 'howlongwait.dat') then begin
-    assignfile(A,datalocation + 'howlongwait.dat');
-    rewrite(A);
-    write(A,'-1');
-    closefile(A);
-  end;
-  if NOT fileexists(datalocation + 'normalmode.in') then begin
-    assignfile(A,datalocation + 'normalmode.in');
-    rewrite(A);
-    closefile(A);
-  end;
-  if NOT fileexists(datalocation + 'songchoice.dat') then begin
-    assignfile(A,datalocation + 'songchoice.dat');
-    rewrite(A);
-    write(A,'1');
-    closefile(A);
-  end;
-  if NOT fileexists(datalocation + 'dtwkedit.no') and NOT fileexists(datalocation + 'dtwkedit.in') then begin
-    assignfile(A,datalocation + 'dtwkedit.no');
-    rewrite(A);
-    write(A,'-1');
-    closefile(A);
-  end;
+  if NOT (fileexists(datalocation + 'allowaddbutton.no')) and NOT (fileexists(datalocation + 'allowaddbutton.in')) then QuickWrite( datalocation + 'allowaddbutton.no', '');
+  if NOT (fileexists(datalocation + 'disablequit.no')) and NOT (fileexists(datalocation + 'disablequit.in')) then QuickWrite( datalocation + 'disablequit.no','');
+  if NOT (fileexists(datalocation + 'forcequit60s.no')) and NOT (fileexists(datalocation + 'forcequit60s.in')) then QuickWrite( datalocation + 'forcequit60s.no','');
+  if NOT (fileexists(datalocation + 'remindersenabled.no')) and NOT (fileexists(datalocation + 'remindersenabled.in')) then QuickWrite( datalocation + 'remindersenabled.in','');
+  if NOT fileexists(datalocation + 'howlongwait.dat') then QuickWrite( datalocation + 'howlongwait.dat','-1');
+  if NOT fileexists(datalocation + 'normalmode.in') then QuickWrite( datalocation + 'normalmode.in','');
+  if NOT fileexists(datalocation + 'songchoice.dat') then QuickWrite( datalocation + 'songchoice.dat','2');
+  if NOT fileexists(datalocation + 'dtwkedit.no') and NOT fileexists(datalocation + 'dtwkedit.in') then QuickWrite( datalocation + 'dtwkedit.no','');
   except
       log('(!) EXCEPTION OCCURED WHEN CREATING FILES.' ,true,true);
   end;
@@ -302,19 +274,16 @@ begin
 
   if fileexists(datalocation + 'songchoice.dat') then begin
   //OTHER DATA READER
-    st2 := TStringList.Create;
-    try
-      st2.LoadFromFile(datalocation + 'songchoice.dat');
+
+
+
       try
-        MusicOption:= strtoint(st2[0]);
+        MusicOption:= strtoint(QuickRead(datalocation + 'songchoice.dat'));
       except
         deletefile(datalocation + 'songchoice.dat');
         log('(!) EXCEPTION OCCURED WHEN READING & CONVERTING SONG CHOICE! Temp Value: ' + st2[0] ,true,true);
       end;
-    finally
-      st2.Free;
 
-    end;
   end;
 end;
 
@@ -406,6 +375,19 @@ begin
   end;
 end;
 
+procedure TTTS.QuickWrite(filename, data: string);
+var
+  ts: TStringList;
+begin
+  ts := TStringList.Create;
+  try
+    ts.Add(data);
+    try ts.SaveToFile(filename); except end;
+  finally
+    ts.Free;
+  end;
+end;
+
 procedure TTTS.SelectMusicOption;
 begin
   case MusicOption of
@@ -460,8 +442,7 @@ if (sec>timetostop) and not (timetostop = -1) then InitAlarmExpire;
 end;
 
 procedure TTTS.TRTimer(Sender: TObject);
-var
-  st: TStringList;
+
 begin
 try
   idlestrictness := strtoint( QuickRead(datalocation + 'idletime.dat') );
@@ -518,17 +499,12 @@ end;
 
 
 //Load time to stop alarm
-st := TStringList.Create;
-if fileexists(datalocation + 'howlongwait.dat') then begin
-  try
-    st := TStringList.Create;
-    st.LoadFromFile(datalocation + 'howlongwait.dat');
-    timetostop:=strtoint(st[0]) + BonusTime;
-  finally
-    st.Free;
-  end;
-    if fileexists(datalocation + 'allowaddbutton.in') then Form1.Add.Show else Form1.Add.Hide;
-  end;
+
+try
+  timetostop:=strtoint(QuickRead(datalocation + 'howlongwait.dat')) + BonusTime;
+except
+  log('(!) EXCEPTION OCCURED WHEN LOADING TIMETOSTOP! Temp Value:' + QuickRead(datalocation + 'howlongwait.dat') ,true,true);
+end;
 
   //log('(!) EXCEPTION OCCURED WHEN LOADING TIMETOSTOP! Temp Value:' + tempstop ,true,true);
 
@@ -547,27 +523,8 @@ TTS.Hide;
 sec := sec + TR.Interval div 1000;
 lastsecond:=SecondOfTheDay(Now);
 
+QuickWrite( datalocation + 'dts\' + filename + '.dat', inttostr(sec) );
 
-st := TStringList.Create;
-try
-  st.Add(inttostr(sec));
-  st.SaveToFile(datalocation + 'dts\' + filename + '.dat');
-except begin
-  st.Free;
-  {
-  log('(!) EXCEPTION OCCURED WHEN WRITING SEC TO FILE! Acces could be denied?' + tempstop ,true,true);
-  if errorno=false then begin
-    ShowMessage('It Appears acess to the TTT data file was denied. This will be logged');
-    assignfile(F,datalocation + 'deniedacess.txt');
-    append(F);
-    tmpdat:='Acess denied to data file. Sec = ' + inttostr(Sec) + ' Time of event: ' + datetostr(Now) + ' ' + timetostr(Now);
-    WriteLn(F,tmpdat);
-  CloseFile(F);
-  end;
-  errorno:=true;       }
-end;
-
-end;
 
   //IF TIMES UP
   if sec=timetostop then InitAlarmExpire;

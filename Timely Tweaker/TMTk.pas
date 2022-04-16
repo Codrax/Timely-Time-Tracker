@@ -53,7 +53,6 @@ type
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
-    procedure checkdata;
     procedure Button5Click(Sender: TObject);
     procedure InsFontClick(Sender: TObject);
     procedure UnFontClick(Sender: TObject);
@@ -75,6 +74,9 @@ type
   private
     { Private declarations }
     procedure StartDataSync;
+    procedure checkdata;
+    procedure QuickWrite(filename, data: string);
+    function QuickRead(filename: string): string;
   public
     { Public declarations }
   end;
@@ -149,6 +151,33 @@ case ComboBox1.ItemIndex of
 end;
 end;
 
+function TForm1.QuickRead(filename: string): string;
+var
+  ts: TStringList;
+begin
+  if not fileexists(filename) then Exit;
+  ts := TStringList.Create;
+  try
+    try ts.LoadFromFile(filename); except end;
+    Result := trim(ts.Text);
+  finally
+    ts.Free;
+  end;
+end;
+
+procedure TForm1.QuickWrite(filename, data: string);
+var
+  ts: TStringList;
+begin
+  ts := TStringList.Create;
+  try
+    ts.Add(data);
+    try ts.SaveToFile(filename); except end;
+  finally
+    ts.Free;
+  end;
+end;
+
 procedure TForm1.StartDataSync;
 begin
 //Theme Loader
@@ -189,95 +218,54 @@ end;
 
 procedure TForm1.Button1Click(Sender: TObject);
 var
-  R: textfile;
   lk: string;
-  ResStream: TResourceStream;
 begin
 //Other Writes
-
-AssignFile(R,datalocation + 'songchoice.dat');
-rewrite(R);
-write(R,ComboBox1.ItemIndex+1);
-closefile(R);
-
-//
+QuickWrite( datalocation + 'songchoice.dat',inttostr(ComboBox1.ItemIndex+1));
 
 //
 if CheckBox1.Checked=true then begin
   if fileexists(datalocation + 'disablequit.in') then deletefile(datalocation + 'disablequit.in');
-  assignfile(R,datalocation + 'disablequit.no');
-  rewrite(R); closefile(R);
+  QuickWrite( datalocation + 'disablequit.no','');
 end else begin
   if fileexists(datalocation + 'disablequit.no') then deletefile(datalocation + 'disablequit.no');
-  assignfile(R,datalocation + 'disablequit.in');
-  rewrite(R); closefile(R);
+  QuickWrite( datalocation + 'disablequit.in','');
 end;
 //
 if CheckBox2.Checked=true then begin
   if fileexists(datalocation + 'forcequit60s.no') then deletefile(datalocation + 'forcequit60s.no');
-  assignfile(R,datalocation + 'forcequit60s.in');
-  rewrite(R); closefile(R);
+  QuickWrite( datalocation + 'forcequit60s.in','');
 end else begin
   if fileexists(datalocation + 'forcequit60s.in') then deletefile(datalocation + 'forcequit60s.in');
-  assignfile(R,datalocation + 'forcequit60s.no');
-  rewrite(R); closefile(R);
+  QuickWrite( datalocation + 'forcequit60s.no','');
 end;
 //
 if CheckBox3.Checked=true then begin
   if fileexists(datalocation + 'remindersenabled.no') then deletefile(datalocation + 'remindersenabled.no');
-  assignfile(R,datalocation + 'remindersenabled.in');
-  rewrite(R); closefile(R);
+  QuickWrite( datalocation + 'remindersenabled.in','');
 end else begin
   if fileexists(datalocation + 'remindersenabled.in') then deletefile(datalocation + 'remindersenabled.in');
-  assignfile(R,datalocation + 'remindersenabled.no');
-  rewrite(R); closefile(R);
+  QuickWrite( datalocation + 'remindersenabled.no','');
 end;
 //
-assignfile(R,datalocation + 'idletime.dat');
-rewrite(R); writeln(R,ComboBox2.ItemIndex); closefile(R);
+QuickWrite( datalocation + 'idletime.dat',inttostr( ComboBox2.ItemIndex ));
 //
 if CheckBox5.Checked=true then begin
   if fileexists(datalocation + 'allowaddbutton.no') then deletefile(datalocation + 'allowaddbutton.no');
-  assignfile(R,datalocation + 'allowaddbutton.in');
-  rewrite(R); closefile(R);
+  QuickWrite( datalocation + 'allowaddbutton.in','');
 end else begin
   if fileexists(datalocation + 'allowaddbutton.in') then deletefile(datalocation + 'allowaddbutton.in');
-  assignfile(R,datalocation + 'allowaddbutton.no');
-  rewrite(R); closefile(R);
+  QuickWrite( datalocation + 'allowaddbutton.no','');
 end;
 //
 lk := 'C:\Users\' + WUserName + '\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\Timely Time Tracker.lnk';
 if CheckBox4.Checked=true then begin
 CreateLink('C:\Program Files\Timely Time Tracker\TTSm.exe', lk, 'Timely Time Tracking Service', '');
-{
-if fileexists('C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\Timely Time Tracker.lnk') then begin
-ShellExecute(0, 'runas', 'cmd.exe', PChar(' /k del "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\Timely Time Tracker.lnk"'), nil, SW_SHOW);
-    ShowMessage('You may now close the Command Prompt');
-end;
-end
-else begin
-begin
-if not fileexists('C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\Timely Time Tracker.lnk') then begin
-  ResStream := TResourceStream.Create(HInstance, 'Resource_1', RT_RCDATA);
-  try
-    ResStream.Position := 1;
-    ResStream.SaveToFile(datalocation + 'Timely Time Tracker.lnk');
-    ShellExecute(0, 'runas', 'cmd.exe', PChar(' /k "copy "C:\ProgramData\TTS\Timely Time Tracker.lnk" "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\Timely Time Tracker.lnk""'), nil, SW_SHOW);
-    ShowMessage('You may now close the Command Prompt');
-  finally
-    ResStream.Free;
-  end;
-end;
-end;     }
 
 end else if fileexists(lk) then deletefile(lk);
-         
 
 //
-assignfile(R,datalocation + 'howlongwait.dat');
-  rewrite(R);
-  write(R,Edit1.Text);
-  closefile(R);
+  QuickWrite( datalocation + 'howlongwait.dat',Edit1.Text);
 end;
 
 procedure TForm1.Button2Click(Sender: TObject);
@@ -469,25 +457,14 @@ A: textfile;
 temp: string;
 begin
 //READ VALUES
-assignfile(A,datalocation + 'howlongwait.dat');
-reset(A);
-read(A,temp);
-Edit1.Text:=temp;
-closefile(A);
+Edit1.Text := QuickRead( datalocation + 'howlongwait.dat' );
 
-assignfile(A,datalocation + 'idletime.dat');
-reset(A);
-read(A,temp);
-ComboBox2.ItemIndex:=strtoint(temp);
-closefile(A);
-
-assignfile(A,datalocation + 'songchoice.dat');
-reset(A);
-read(A,temp);
-h:=strtoint(temp);
-ComboBox1.ItemIndex:=h-1;
-closefile(A);
-
+try
+ComboBox2.ItemIndex := strtoint(QuickRead( datalocation + 'idletime.dat') );
+except end;
+try
+ComboBox1.ItemIndex := strtoint(QuickRead( datalocation + 'songchoice.dat') ) - 1;
+except end;
 
 if fileexists(datalocation + 'allowaddbutton.no') then CheckBox5.Checked:=false else CheckBox5.Checked:=true;
 if fileexists(datalocation + 'disablequit.no') then CheckBox1.Checked:=true else CheckBox1.Checked:=false;

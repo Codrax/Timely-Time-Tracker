@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Imaging.pngimage, Vcl.ExtCtrls,
   Vcl.StdCtrls, Vcl.ControlList, DateUtils, ShellApi, Vcl.WinXPickers,
-  Vcl.Grids, Vcl.Samples.Calendar, Vcl.WinXCalendars;
+  Vcl.Grids, Vcl.Samples.Calendar, Vcl.WinXCalendars, Vcl.Clipbrd;
 
 type
   TAppUsage = class(TForm)
@@ -58,6 +58,7 @@ type
     procedure HdSecondsClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure calenChange(Sender: TObject);
+    procedure pthClick(Sender: TObject);
   private
     { Private declarations }
     function geticon(exel: string; bitmap: TBitmap): TBitMap;
@@ -161,6 +162,11 @@ begin
   Self.Visible := true;
   Self.Left := Self.Left - screen.Width div 20;
   if Self.Left <= Screen.Width div 2 - Self.Width div 2 then OpenAnim.Enabled := false;
+end;
+
+procedure TAppUsage.pthClick(Sender: TObject);
+begin
+  Clipboard.AsText := Copy(pth.Caption, 6, length(pth.Caption));
 end;
 
 procedure TAppUsage.SetMostUsedApps;

@@ -1483,97 +1483,6 @@ object Form1: TForm1
     Font.Style = []
     ParentFont = False
   end
-  object DMtx: TLabel
-    Left = 216
-    Top = 112
-    Width = 161
-    Height = 35
-    AutoSize = False
-    Color = 234
-    GlowSize = 59
-    ParentColor = False
-    Transparent = False
-    WordWrap = True
-    OnClick = Dism
-  end
-  object DMbg: TLabel
-    Left = 216
-    Top = 115
-    Width = 139
-    Height = 32
-    Alignment = taCenter
-    AutoSize = False
-    Caption = #10060'Dismiss'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindow
-    Font.Height = -24
-    Font.Name = 'Nexa Bold'
-    Font.Style = []
-    ParentFont = False
-    OnClick = Dism
-  end
-  object SDtx: TLabel
-    Left = 24
-    Top = 112
-    Width = 180
-    Height = 35
-    AutoSize = False
-    Color = 64256
-    ParentColor = False
-    Transparent = False
-    OnClick = PowerOffPC
-  end
-  object SDbg: TLabel
-    Left = 24
-    Top = 115
-    Width = 180
-    Height = 32
-    Alignment = taCenter
-    AutoSize = False
-    Caption = #10148' Shut Down'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWhite
-    Font.Height = -24
-    Font.Name = 'Nexa Bold'
-    Font.Style = []
-    ParentFont = False
-    OnClick = PowerOffPC
-  end
-  object tmr: TLabel
-    Left = 28
-    Top = 113
-    Width = 34
-    Height = 33
-    Caption = '90'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWhite
-    Font.Height = -27
-    Font.Name = 'Tahoma'
-    Font.Style = [fsBold]
-    ParentFont = False
-    Visible = False
-  end
-  object Add: TLabel
-    Left = 345
-    Top = 112
-    Width = 40
-    Height = 35
-    Hint = 'Add 1 hour'
-    AutoSize = False
-    Caption = ' +'
-    Color = clSilver
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWhite
-    Font.Height = -29
-    Font.Name = 'Tahoma'
-    Font.Style = [fsBold]
-    ParentColor = False
-    ParentFont = False
-    ParentShowHint = False
-    ShowHint = True
-    Transparent = False
-    OnClick = AddClick
-  end
   object crn1: TImage
     Left = -2
     Top = -2
@@ -1783,6 +1692,213 @@ object Form1: TForm1
       82}
     Stretch = True
   end
+  object tmr2: TLabel
+    Left = 28
+    Top = 113
+    Width = 34
+    Height = 33
+    Caption = '90'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWhite
+    Font.Height = -27
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+    Transparent = True
+    Visible = False
+  end
+  object sd: CButton
+    Left = 24
+    Top = 112
+    Width = 180
+    Height = 40
+    OnClick = PowerOffPC
+    OnStateChange = sdStateChange
+    TabStop = True
+    TabOrder = 0
+    BmpTransparentColor = clWhite
+    ButtonIcon = cicNone
+    BmpCustomTrColor = False
+    ControlStyle = []
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 14123546
+    Font.Height = -24
+    Font.Name = 'Nexa Bold'
+    Font.Style = []
+    Text = #10148' Shut Down'
+    RoundTransparent = True
+    RoundAmount = 16
+    PressAnimation = True
+    PressAnimationDelay = 2
+    PressAnimationShrinkAmount = 2
+    State = mbsLeave
+    UnderLine = True
+    UnderLineThicknes = 10
+    FlatButton = False
+    Colors.Enter = 4128574
+    Colors.Leave = 64256
+    Colors.Down = 50688
+    Colors.BLine = 48896
+    Preset.Color = clBlue
+    Preset.Kind = cbprCustom
+    Preset.PenColorAuto = True
+    Preset.ApplyOnce = False
+    Preset.IgnoreGlobalSync = False
+    TextColors.Enter = clWhite
+    TextColors.Leave = clWhite
+    TextColors.Down = clWhite
+    TextColors.BLine = clBlack
+    Pen.Color = 15987699
+    Pen.Width = 0
+    Pen.EnableAlternativeColors = False
+    Pen.FormSyncedColor = True
+    Pen.AltHoverColor = clBlack
+    Pen.AltPressColor = clBlack
+  end
+  object dm: CButton
+    Left = 210
+    Top = 112
+    Width = 169
+    Height = 40
+    OnClick = Dism
+    OnStateChange = dmStateChange
+    TabStop = True
+    TabOrder = 1
+    BmpTransparentColor = clWhite
+    ButtonIcon = cicNone
+    BmpCustomTrColor = False
+    ControlStyle = []
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 14123546
+    Font.Height = -24
+    Font.Name = 'Nexa Bold'
+    Font.Style = []
+    Text = #10060'Dismiss   '
+    RoundTransparent = True
+    RoundAmount = 16
+    PressAnimation = True
+    PressAnimationDelay = 2
+    PressAnimationShrinkAmount = 2
+    State = mbsLeave
+    UnderLine = True
+    UnderLineThicknes = 10
+    FlatButton = False
+    Colors.Enter = 2829311
+    Colors.Leave = 234
+    Colors.Down = 196
+    Colors.BLine = 136
+    Preset.Color = clBlue
+    Preset.Kind = cbprCustom
+    Preset.PenColorAuto = True
+    Preset.ApplyOnce = False
+    Preset.IgnoreGlobalSync = False
+    TextColors.Enter = clWhite
+    TextColors.Leave = clWhite
+    TextColors.Down = clWhite
+    TextColors.BLine = clBlack
+    Pen.Color = 15987699
+    Pen.Width = 0
+    Pen.EnableAlternativeColors = False
+    Pen.FormSyncedColor = True
+    Pen.AltHoverColor = clBlack
+    Pen.AltPressColor = clBlack
+  end
+  object Add: CButton
+    Left = 346
+    Top = 120
+    Width = 26
+    Height = 26
+    Hint = 'Aaaa'
+    OnClick = AddClick
+    TabStop = True
+    TabOrder = 2
+    BmpTransparentColor = clWhite
+    ButtonIcon = cicNone
+    BmpCustomTrColor = False
+    ControlStyle = []
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 14123546
+    Font.Height = -40
+    Font.Name = 'Nexa Bold'
+    Font.Style = []
+    Text = '+'
+    RoundTransparent = True
+    RoundAmount = 16
+    PressAnimation = False
+    PressAnimationDelay = 2
+    PressAnimationShrinkAmount = 2
+    State = mbsLeave
+    UnderLine = False
+    UnderLineThicknes = 10
+    FlatButton = False
+    Colors.Enter = 13158600
+    Colors.Leave = 9671571
+    Colors.Down = 6908265
+    Colors.BLine = 234
+    Preset.Color = clBlue
+    Preset.Kind = cbprCustom
+    Preset.PenColorAuto = True
+    Preset.ApplyOnce = False
+    Preset.IgnoreGlobalSync = False
+    TextColors.Enter = clWhite
+    TextColors.Leave = clWhite
+    TextColors.Down = clWhite
+    TextColors.BLine = clBlack
+    Pen.Color = 234
+    Pen.Width = 0
+    Pen.EnableAlternativeColors = True
+    Pen.FormSyncedColor = False
+    Pen.AltHoverColor = clRed
+    Pen.AltPressColor = clRed
+  end
+  object tmr: CButton
+    Left = 34
+    Top = 118
+    Width = 35
+    Height = 28
+    OnStateChange = tmrStateChange
+    TabStop = True
+    TabOrder = 3
+    Visible = False
+    BmpTransparentColor = clWhite
+    ButtonIcon = cicNone
+    BmpCustomTrColor = False
+    ControlStyle = []
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 14123546
+    Font.Height = -27
+    Font.Name = 'Segoe UI Semibold'
+    Font.Style = []
+    Text = '90'
+    RoundTransparent = False
+    RoundAmount = 10
+    PressAnimation = False
+    PressAnimationDelay = 2
+    PressAnimationShrinkAmount = 3
+    State = mbsLeave
+    UnderLine = False
+    UnderLineThicknes = 10
+    FlatButton = False
+    Colors.Enter = 4128574
+    Colors.Leave = 64256
+    Colors.Down = 50688
+    Colors.BLine = 9328145
+    Preset.Color = clBlue
+    Preset.Kind = cbprCustom
+    Preset.PenColorAuto = True
+    Preset.ApplyOnce = False
+    Preset.IgnoreGlobalSync = False
+    TextColors.Enter = clWhite
+    TextColors.Leave = clWhite
+    TextColors.Down = clWhite
+    TextColors.BLine = clBlack
+    Pen.Color = 15987699
+    Pen.Width = 0
+    Pen.EnableAlternativeColors = False
+    Pen.FormSyncedColor = False
+    Pen.AltHoverColor = clBlack
+    Pen.AltPressColor = clBlack
+  end
   object SoundAlarm: TTimer
     Enabled = False
     Interval = 4000
@@ -1804,6 +1920,6 @@ object Form1: TForm1
     Enabled = False
     Interval = 10
     OnTimer = HideANTimer
-    Left = 248
+    Left = 264
   end
 end

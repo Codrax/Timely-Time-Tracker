@@ -499,7 +499,6 @@ object AppUsage: TAppUsage
       Font.Style = []
       ParentFont = False
       Transparent = True
-      ExplicitLeft = 246
       ExplicitHeight = 13
     end
     object appico: TImage
@@ -551,7 +550,7 @@ object AppUsage: TAppUsage
       AlignWithMargins = True
       Left = 43
       Top = 12
-      Width = 165
+      Width = 82
       Height = 25
       Margins.Top = 12
       Align = alLeft
@@ -564,6 +563,7 @@ object AppUsage: TAppUsage
       Font.Style = []
       ParentFont = False
       Transparent = True
+      ExplicitHeight = 13
     end
   end
   object HdSeconds: TCheckBox
@@ -604,6 +604,7 @@ object AppUsage: TAppUsage
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
+      OnClick = pthClick
     end
     object secsid: TLabel
       Left = 12

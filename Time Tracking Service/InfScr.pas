@@ -5,25 +5,24 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Imaging.pngimage,
-  Vcl.ExtCtrls, MMSystem, Vcl.Themes;
+  Vcl.ExtCtrls, MMSystem, Vcl.Themes, CodsButton;
 
 type
   TForm1 = class(TForm)
     ico: TImage;
     Title: TLabel;
-    DMtx: TLabel;
-    DMbg: TLabel;
-    SDtx: TLabel;
-    SDbg: TLabel;
     SoundAlarm: TTimer;
     AutoStop: TTimer;
-    tmr: TLabel;
-    Add: TLabel;
+    tmr2: TLabel;
     crn1: TImage;
     crn2: TImage;
     border: TImage;
     ShowAN: TTimer;
     HideAN: TTimer;
+    sd: CButton;
+    dm: CButton;
+    Add: CButton;
+    tmr: CButton;
     procedure FormCreate(Sender: TObject);
     procedure SoundAlarmTimer(Sender: TObject);
     procedure PowerOffPC(Sender: TObject);
@@ -32,8 +31,12 @@ type
     procedure AddClick(Sender: TObject);
     procedure ShowANTimer(Sender: TObject);
     procedure HideANTimer(Sender: TObject);
+    procedure tmrStateChange(Sender: CButton; State: CButtonState);
+    procedure sdStateChange(Sender: CButton; State: CButtonState);
+    procedure dmStateChange(Sender: CButton; State: CButtonState);
   private
     { Private declarations }
+    procedure SetAddColors;
   public
     { Public declarations }
   end;
@@ -77,9 +80,52 @@ begin
   HideAN.Enabled := true;
 end;
 
+procedure TForm1.dmStateChange(Sender: CButton; State: CButtonState);
+begin
+  SetAddColors;
+end;
+
 procedure TForm1.PowerOffPC(Sender: TObject);
 begin
   WinExec('shutdown /p', SW_SHOW);
+end;
+
+procedure TForm1.sdStateChange(Sender: CButton; State: CButtonState);
+begin
+  SetAddColors;
+  tmr.State := sd.State;
+  if sd.State = mbsDown then
+  begin
+    tmr.Font.Size := 14;
+  end
+  else
+  begin
+    tmr.Font.Size := 20;
+  end;
+  tmr.Invalidate;
+end;
+
+procedure TForm1.SetAddColors;
+begin
+  if sd.Width > 200 then begin
+    Add.State := sd.State
+  end
+  else
+  begin
+    Add.State := dm.State;
+  end;
+
+  if add.State = mbsDown then begin
+    add.Width := 24;
+    add.Height := 24;
+    add.Font.Size := 26;
+  end else begin
+    add.Font.Size := 30;
+    add.Width := 26;
+    add.Height := 26;
+  end;
+
+  Add.Invalidate;
 end;
 
 procedure TForm1.ShowANTimer(Sender: TObject);
@@ -97,6 +143,12 @@ if fileexists(datalocation + 'allowaddbutton.in') then Add.Show else Add.Hide;
 TTS.SelectMusicOption;
 end;
 
+procedure TForm1.tmrStateChange(Sender: CButton; State: CButtonState);
+begin
+  sd.State := tmr.State;
+  SetAddColors;
+end;
+
 procedure TForm1.AddClick(Sender: TObject);
 begin
   SoundAlarm.Enabled:=false;
@@ -109,7 +161,7 @@ end;
 
 procedure TForm1.AutoStopTimer(Sender: TObject);
 begin
-  tmr.Caption:=inttostr(TimeTIllStop);
+  tmr.Text:=inttostr(TimeTIllStop);
   TimeTillStop:=TimeTillStop-1;
   if TimeTillStop<1 then begin
   PowerOffPC(nil);
