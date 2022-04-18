@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Grids,
   Vcl.Samples.Calendar, Vcl.WinXCtrls, Vcl.Imaging.pngimage, MMSystem, ShellAPI, Vcl.Themes,
-  TimelyLib, ApplicationUsageStats;
+  TimelyLib, ApplicationUsageStats, AboutUI;
 
 type
   TTimely = class(TForm)
@@ -79,6 +79,7 @@ type
     procedure OpenAnimTimer(Sender: TObject);
     procedure CloseAnimTimer(Sender: TObject);
     procedure AppUsageOpenClick(Sender: TObject);
+    procedure OpenAbout(Sender: TObject);
   private
     { Private declarations }
   public
@@ -143,12 +144,20 @@ begin
     Self.Left := Self.Left - (Screen.Width div 50 - 2 * i);
     i := i + 1;
   end;
-  if Self.Left >= Screen.DesktopWidth then begin CloseAnim.Enabled:=false; Application.Terminate end;
+  if Self.Left >= Screen.DesktopWidth then begin CloseAnim.Enabled:=false; Application.Terminate; i := 0; end;
 end;
 
 procedure TTimely.closeappClick(Sender: TObject);
 begin
   CloseAnim.Enabled := true;
+end;
+
+procedure TTimely.OpenAbout(Sender: TObject);
+begin
+  AboutTimely.Top := Screen.Height div 2 - AboutTimely.Height div 2;
+  AboutTimely.Left := Screen.Width;
+  AboutTimely.vertx.Caption := ver.Caption;
+  AboutTimely.OpenAnim.Enabled := true;
 end;
 
 procedure TTimely.day1MouseEnter(Sender: TObject);

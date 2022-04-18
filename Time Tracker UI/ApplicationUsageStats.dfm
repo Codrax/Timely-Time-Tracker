@@ -2,7 +2,7 @@ object AppUsage: TAppUsage
   Left = 0
   Top = 0
   BorderStyle = bsNone
-  Caption = 'Form4'
+  Caption = 'Timely Time Tracker UI'
   ClientHeight = 363
   ClientWidth = 660
   Color = clBtnFace

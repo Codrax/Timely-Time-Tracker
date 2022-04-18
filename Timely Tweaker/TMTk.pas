@@ -340,7 +340,7 @@ end;
 
 procedure TForm1.DeleteDataClick(Sender: TObject);
 begin
-if MessageDlg('Are you sure you want to delete ALL' + #13 + 'the computer usage files? This action is irreversibie', mtWarning, [mbYes, mbNo], 0) = mrYes then begin
+if MessageDlg('Are you sure you want to delete ALL' + #13 + 'the computer usage files? This action is irreversibile', mtWarning, [mbYes, mbNo], 0) = mrYes then begin
 
   TDirectory.Delete(datalocation + 'dts', true);
 mkdir(datalocation + 'dts');

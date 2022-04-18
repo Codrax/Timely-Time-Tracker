@@ -111,7 +111,7 @@ begin
     Self.Left := Self.Left - (Screen.Width div 50 - 2 * i);
     i := i + 1;
   end;
-  if Self.Left >= Screen.DesktopWidth then begin CloseAnim.Enabled:=false; Self.Hide; end;
+  if Self.Left >= Screen.DesktopWidth then begin CloseAnim.Enabled:=false; Self.Hide; i := 0; end;
 end;
 
 procedure TAppUsage.closeappClick(Sender: TObject);

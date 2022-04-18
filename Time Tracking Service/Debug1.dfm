@@ -65,10 +65,18 @@ object Form3: TForm3
   end
   object Label7: TLabel
     Left = 288
-    Top = 100
+    Top = 119
     Width = 25
     Height = 13
     Caption = 'Idle: '
+  end
+  object Label8: TLabel
+    Left = 288
+    Top = 100
+    Width = 89
+    Height = 13
+    Caption = 'Int:InfoScr Left = '
+    OnClick = Label5Click
   end
   object Button1: TButton
     Left = 120
@@ -238,6 +246,15 @@ object Form3: TForm3
     Height = 25
     Caption = 'Ok TTS'
     TabOrder = 18
+    OnClick = Button16Click
+  end
+  object Button15: TButton
+    Left = 217
+    Top = 176
+    Width = 41
+    Height = 25
+    Caption = 'Ok IScr'
+    TabOrder = 19
     OnClick = Button16Click
   end
   object Timer1: TTimer

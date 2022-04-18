@@ -5742,7 +5742,9 @@ object Timely: TTimely
     Top = 341
     Width = 150
     Height = 14
+    Cursor = crHandPoint
     Caption = 'Made by Petculescu Codrut'
+    OnClick = OpenAbout
   end
   object hrs: TLabel
     Left = 254
@@ -6019,9 +6021,11 @@ object Timely: TTimely
   object ver: TLabel
     Left = 10
     Top = 341
-    Width = 24
+    Width = 62
     Height = 14
-    Caption = 'v3.0'
+    Cursor = crHandPoint
+    Caption = 'Version 3.0'
+    OnClick = OpenAbout
   end
   object geardark: TImage
     Left = 597

@@ -10,7 +10,8 @@ uses
   TimelyLib in '..\Shared\TimelyLib.pas',
   Vcl.Themes,
   Vcl.Styles,
-  ApplicationUsageStats in 'ApplicationUsageStats.pas' {AppUsage};
+  ApplicationUsageStats in 'ApplicationUsageStats.pas' {AppUsage},
+  AboutUI in 'AboutUI.pas' {AboutTimely};
 
 {$R *.res}
 
@@ -20,5 +21,6 @@ begin
   TStyleManager.TrySetStyle('Windows10');
   Application.CreateForm(TTimely, Timely);
   Application.CreateForm(TAppUsage, AppUsage);
+  Application.CreateForm(TAboutTimely, AboutTimely);
   Application.Run;
 end.

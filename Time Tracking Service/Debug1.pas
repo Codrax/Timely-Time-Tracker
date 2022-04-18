@@ -36,6 +36,8 @@ type
     Button17: TButton;
     Label6: TLabel;
     Label7: TLabel;
+    Label8: TLabel;
+    Button15: TButton;
     procedure Timer1Timer(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -134,7 +136,7 @@ end;
 
 procedure TForm3.Button16Click(Sender: TObject);
 begin
-  timetostop := strtoint(Edit1.Text);
+  Form1.Left := strtoint(Edit1.Text);
 end;
 
 procedure TForm3.Button1Click(Sender: TObject);
@@ -220,6 +222,7 @@ try
 except end;
 Label6.Caption:='Str:Current Caption = ' + trim(GetCurrentAppName);
 Label7.Caption := Format('System idle time: %d s', [IdleTime]);
+Label8.Caption := 'Int:InfoScr Left = ' + inttostr(Form1.Left);
 
 if enablelogging=true then CheckBox1.Checked:=true else CheckBox1.Checked:=false;
 

@@ -1,5 +1,5 @@
 object Form2: TForm2
-  Left = 0
+  Left = -400
   Top = 0
   BorderStyle = bsNone
   Caption = 'Notification'
@@ -16,7 +16,6 @@ object Form2: TForm2
   FormStyle = fsStayOnTop
   OldCreateOrder = False
   Position = poDesigned
-  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object crn1: TImage

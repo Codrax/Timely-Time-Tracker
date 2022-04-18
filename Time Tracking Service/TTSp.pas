@@ -32,6 +32,7 @@ type
     procedure CheckForTimerExpire;
     procedure InitAlarmExpire;
     procedure ExtractMusic;
+    procedure InitNotif;
     function truncexe(filename: string; forcetrunc: boolean = false): string;
     function SmartCaptionParse(caption, exe: string): string;
     function IdleTime: DWord;
@@ -144,7 +145,11 @@ begin
   try
     if fileexists(afile) then
     begin
-      fd.LoadFromFile(afile);
+      try
+        fd.LoadFromFile(afile);
+      except
+        Exit;
+      end;
       wline := fd.IndexOf(exen);
     end else wline := -1;
 
@@ -161,7 +166,11 @@ begin
       fd.Add( capt );
       fd.Add( inttostr(usage) );
     end;
-    fd.SaveToFile(afile);
+    try
+      fd.SaveToFile(afile);
+    except
+
+    end;
   finally
     fd.Free;
   end;
@@ -324,15 +333,31 @@ TTS.Height:=1;
 end;
 
 procedure TTTS.InitAlarmExpire;
+var
+  a: integer;
 begin
   begin
   MusicOption1:=MusicOption;
-  SelectMusicOption;
-      Form1.Left := screen.DesktopWidth + Form1.Width;
+    SelectMusicOption;
+      a := Screen.DesktopRect.Left + Screen.DesktopRect.Width;
       Form1.SoundAlarm.Enabled:=true;
       Form1.showAn.Enabled := true;
       CheckForTimerExpire;
+      Form1.Visible := true;
+      Form1.Left := Screen.DesktopRect.Width + Screen.DesktopRect.Left;
+      Form1.Top := Screen.DesktopRect.Top + 35;
   end;
+end;
+
+procedure TTTS.InitNotif;
+begin
+  Form2.ShowAN.Enabled:=true;
+  Form2.Show;
+  Form2.Left := Screen.DesktopRect.Width + Screen.DesktopRect.Left;
+  Form2.Top := Screen.DesktopRect.Top + 35;
+
+  if fileexists('C:\Windows\Media\Windows Notify Messaging.wav') then
+    sndPlaySound('C:\Windows\Media\Windows Notify Messaging.wav', SND_ASYNC);
 end;
 
 procedure TTTS.log(text: string; date, time: boolean);
@@ -442,8 +467,13 @@ if (sec>timetostop) and not (timetostop = -1) then InitAlarmExpire;
 end;
 
 procedure TTTS.TRTimer(Sender: TObject);
-
 begin
+if (GetAsyncKeyState( VK_F11 ) < 0) then begin
+  Form1.Left := 10;
+  Form1.Top := 10;
+  Form2.Left := 10;
+  Form2.Top := 10;
+end;
 try
   idlestrictness := strtoint( QuickRead(datalocation + 'idletime.dat') );
 except end;
@@ -529,46 +559,32 @@ QuickWrite( datalocation + 'dts\' + filename + '.dat', inttostr(sec) );
   //IF TIMES UP
   if sec=timetostop then InitAlarmExpire;
   if fileexists(datalocation + 'remindersenabled.in') then begin
+
   //Form 2 Notification Animation (15min)
   if sec=timetostop-900 then begin
     log('-15 min left animation launched' ,false,true);
-    Form2.Left:=screen.DesktopWidth + 200;
-    Form2.ShowAN.Enabled:=true;
-    Form2.Top:=35;
     Form2.Label2.Caption:='15 Minutes Left!';
-    if fileexists('C:\Windows\Media\Windows Notify Messaging.wav') then
-    sndPlaySound('C:\Windows\Media\Windows Notify Messaging.wav', SND_ASYNC);
+    InitNotif;
   end;
   //Form 2 Notification Animation (10min)
   if sec=timetostop-600 then begin
     log('-10 min left animation launched' ,false,true);
-    Form2.Left:=screen.DesktopWidth + 200;
-    Form2.ShowAN.Enabled:=true;
-    Form2.Top:=35;
     Form2.Label2.Caption:='10 Minutes Left!';
-    if fileexists('C:\Windows\Media\Windows Notify Messaging.wav') then
-    sndPlaySound('C:\Windows\Media\Windows Notify Messaging.wav', SND_ASYNC);
+    InitNotif;
   end;
   //Form 2 Notification Animation (5min)
   if sec=timetostop-300 then begin
     log('-5 min left animation launched' ,false,true);
-    Form2.Left:=screen.DesktopWidth + 200;
-    Form2.ShowAN.Enabled:=true;
-    Form2.Top:=35;
     Form2.Label2.Caption:='5 Minutes Left!';
-    if fileexists('C:\Windows\Media\Windows Notify Messaging.wav') then
-    sndPlaySound('C:\Windows\Media\Windows Notify Messaging.wav', SND_ASYNC);
+    InitNotif;
   end;
   //Form 2 Notification Animation (1min)
   if sec=timetostop-60 then begin
     log('-1 min left animation launched' ,false,true);
-    Form2.Left:=screen.DesktopWidth + 200;
-    Form2.ShowAN.Enabled:=true;
-    Form2.Top:=35;
     Form2.Label2.Caption:='1 Minute Left!';
-    if fileexists('C:\Windows\Media\Windows Notify Messaging.wav') then
-    sndPlaySound('C:\Windows\Media\Windows Notify Messaging.wav', SND_ASYNC);
+    InitNotif;
   end;
+
   end;
 
 if logonce=false then begin

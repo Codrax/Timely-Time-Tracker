@@ -139,6 +139,10 @@
             <Form>AppUsage</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="AboutUI.pas">
+            <Form>AboutTimely</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <RcItem Include="C:\Users\Codrut\OneDrive\Documents\Nexa Bold.otf">
             <ContainerId>ResourceItem</ContainerId>
             <ResourceType>RCDATA</ResourceType>
