@@ -1,5 +1,5 @@
 object Form1: TForm1
-  Left = 0
+  Left = -400
   Top = 200
   BorderIcons = []
   BorderStyle = bsNone
@@ -17,7 +17,6 @@ object Form1: TForm1
   FormStyle = fsStayOnTop
   OldCreateOrder = False
   Position = poDesigned
-  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object border: TImage
@@ -1806,7 +1805,7 @@ object Form1: TForm1
   object Add: CButton
     Left = 346
     Top = 120
-    Width = 27
+    Width = 26
     Height = 26
     Hint = 'Aaaa'
     OnClick = AddClick
@@ -1920,6 +1919,6 @@ object Form1: TForm1
     Enabled = False
     Interval = 10
     OnTimer = HideANTimer
-    Left = 248
+    Left = 264
   end
 end

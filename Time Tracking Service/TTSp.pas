@@ -181,6 +181,7 @@ var
   acolor: TColor;
 begin
   with Form1 do begin
+  if fileexists(datalocation + 'allowaddbutton.in') then Add.Show else Add.Hide;
   SoundAlarm.Enabled := false;
   if fileexists(datalocation + 'forcequit60s.in') or (Form3.CheckBox2.Checked) then begin
        AutoStop.Enabled:=true;
@@ -290,7 +291,7 @@ begin
         MusicOption:= strtoint(QuickRead(datalocation + 'songchoice.dat'));
       except
         deletefile(datalocation + 'songchoice.dat');
-        log('(!) EXCEPTION OCCURED WHEN READING & CONVERTING SONG CHOICE! Temp Value: ' + st2[0] ,true,true);
+        log('(!) EXCEPTION OCCURED WHEN READING & CONVERTING SONG CHOICE!' ,true,true);
       end;
 
   end;
@@ -333,13 +334,10 @@ TTS.Height:=1;
 end;
 
 procedure TTTS.InitAlarmExpire;
-var
-  a: integer;
 begin
   begin
   MusicOption1:=MusicOption;
     SelectMusicOption;
-      a := Screen.DesktopRect.Left + Screen.DesktopRect.Width;
       Form1.SoundAlarm.Enabled:=true;
       Form1.showAn.Enabled := true;
       CheckForTimerExpire;
@@ -468,11 +466,12 @@ end;
 
 procedure TTTS.TRTimer(Sender: TObject);
 begin
+if Form1.Visible or Form2.Visible then
 if (GetAsyncKeyState( VK_F11 ) < 0) then begin
-  Form1.Left := 10;
-  Form1.Top := 10;
-  Form2.Left := 10;
-  Form2.Top := 10;
+  Form1.Left := 20;
+  Form1.Top := 20;
+  Form2.Left := 20;
+  Form2.Top := 20;
 end;
 try
   idlestrictness := strtoint( QuickRead(datalocation + 'idletime.dat') );

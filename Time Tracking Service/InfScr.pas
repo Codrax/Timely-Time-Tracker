@@ -21,8 +21,8 @@ type
     HideAN: TTimer;
     sd: CButton;
     dm: CButton;
-    Add: CButton;
     tmr: CButton;
+    Add: CButton;
     procedure SoundAlarmTimer(Sender: TObject);
     procedure PowerOffPC(Sender: TObject);
     procedure Dism(Sender: TObject);
@@ -62,7 +62,7 @@ begin
     Self.Left := Self.Left - (20 - 2 * i);
     i := i + 1;
   end;
-  if Self.Left >= Screen.DesktopRect.Width + Screen.DesktopRect.Left then begin HideAN.Enabled:=false; end;
+  if Self.Left >= Screen.DesktopRect.Width + Screen.DesktopRect.Left then begin HideAN.Enabled:=false; Self.Hide; end;
 end;
 
 procedure TForm1.Dism(Sender: TObject);

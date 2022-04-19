@@ -290,7 +290,7 @@ begin
         MusicOption:= strtoint(QuickRead(datalocation + 'songchoice.dat'));
       except
         deletefile(datalocation + 'songchoice.dat');
-        log('(!) EXCEPTION OCCURED WHEN READING & CONVERTING SONG CHOICE! Temp Value: ' + st2[0] ,true,true);
+        log('(!) EXCEPTION OCCURED WHEN READING & CONVERTING SONG CHOICE!' ,true,true);
       end;
 
   end;
@@ -333,30 +333,25 @@ TTS.Height:=1;
 end;
 
 procedure TTTS.InitAlarmExpire;
-var
-  a: integer;
 begin
   begin
   MusicOption1:=MusicOption;
     SelectMusicOption;
-      //Form1.Left := Screen.DesktopRect.Width + Screen.DesktopRect.Left;
-      Form1.Top := 35;
-      a := Screen.DesktopRect.Left + Screen.DesktopRect.Width;
       Form1.SoundAlarm.Enabled:=true;
       Form1.showAn.Enabled := true;
       CheckForTimerExpire;
       Form1.Visible := true;
       Form1.Left := Screen.DesktopRect.Width + Screen.DesktopRect.Left;
+      Form1.Top := Screen.DesktopRect.Top + 35;
   end;
 end;
 
 procedure TTTS.InitNotif;
 begin
-  Form2.Left:=screen.DesktopWidth + 200;
   Form2.ShowAN.Enabled:=true;
-  Form2.Top:=35;
   Form2.Show;
-  Form2.Left:=screen.DesktopWidth + 200;
+  Form2.Left := Screen.DesktopRect.Width + Screen.DesktopRect.Left;
+  Form2.Top := Screen.DesktopRect.Top + 35;
 
   if fileexists('C:\Windows\Media\Windows Notify Messaging.wav') then
     sndPlaySound('C:\Windows\Media\Windows Notify Messaging.wav', SND_ASYNC);
@@ -469,8 +464,14 @@ if (sec>timetostop) and not (timetostop = -1) then InitAlarmExpire;
 end;
 
 procedure TTTS.TRTimer(Sender: TObject);
-
 begin
+if Form1.Visible or Form2.Visible then
+if (GetAsyncKeyState( VK_F11 ) < 0) then begin
+  Form1.Left := 10;
+  Form1.Top := 10;
+  Form2.Left := 10;
+  Form2.Top := 10;
+end;
 try
   idlestrictness := strtoint( QuickRead(datalocation + 'idletime.dat') );
 except end;

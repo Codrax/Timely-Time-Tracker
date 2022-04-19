@@ -23,7 +23,6 @@ type
     dm: CButton;
     Add: CButton;
     tmr: CButton;
-    procedure FormCreate(Sender: TObject);
     procedure SoundAlarmTimer(Sender: TObject);
     procedure PowerOffPC(Sender: TObject);
     procedure Dism(Sender: TObject);
@@ -55,12 +54,6 @@ uses
 
 {$R *.dfm}
 
-procedure TForm1.FormCreate(Sender: TObject);
-begin
-  Form1.Top:=30;
-  Form1.Left:=screen.Width-(form1.Width+100)
-end;
-
 procedure TForm1.HideANTimer(Sender: TObject);
 begin
   if i > 12 then
@@ -69,7 +62,7 @@ begin
     Self.Left := Self.Left - (20 - 2 * i);
     i := i + 1;
   end;
-  if Self.Left >= Screen.DesktopWidth then begin HideAN.Enabled:=false; end;
+  if Self.Left >= Screen.DesktopRect.Width + Screen.DesktopRect.Left then begin HideAN.Enabled:=false; end;
 end;
 
 procedure TForm1.Dism(Sender: TObject);
@@ -131,9 +124,9 @@ end;
 procedure TForm1.ShowANTimer(Sender: TObject);
 begin
   HideAn.Enabled := false;
-  Self.Show;
+  Self.Visible := true;
   Self.Left := Self.Left-40;
-  if Self.Left <= Screen.DesktopWidth - Self.Width - 20 then begin ShowAN.Enabled:=false; end;
+  if Self.Left <= Screen.DesktopRect.Width + Screen.DesktopRect.Left - Self.Width - 20 then begin ShowAN.Enabled:=false; end;
 end;
 
 procedure TForm1.SoundAlarmTimer(Sender: TObject);
